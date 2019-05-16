@@ -26,4 +26,5 @@ The root folder consits of:
 * The main difficulty right now is to improve the environment. The RL algoritms were tested and should be sufficient.
 * Understand and implement Q-Learning.
 
-
+## Disclaimer
+* The environment is constantly being updated, thus saved models often are not usable anymore
