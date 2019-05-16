@@ -17,8 +17,10 @@ The root folder consits of:
 ## Explanations
 * The environment is a flappy bird clone, i tried to follow Open-Ai's approach when implementing the interface.
 * /Runs is a log that plots the learning process via Tensorboard. 
+* runTensorboard is a simple script that starts Tensoarboard if you provide a directory.
 
 ## ToDo
 * The main difficulty right now is to improve the environment. The RL algoritms were tested and should be sufficient.
 * Understand and implement Q-Learning.
+
 
