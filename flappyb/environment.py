@@ -63,7 +63,7 @@ class Environment:
 
         self.is_done = False
 
-        obs, reward, is_done, _ = self.step(False)      # lol no premium action, why did i write that ?
+        obs, reward, is_done, _ = self.step(0)      # lol no premium action, why did i write that ?
 
         return obs
 
