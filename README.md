@@ -15,12 +15,16 @@ The root folder consits of:
 4. Runs
 
 ## Explanations
+* main.py is to play the game yourself
 * The environment is a flappy bird clone, i tried to follow Open-Ai's approach when implementing the interface.
 * /Runs is a log that plots the learning process via Tensorboard. 
 * runTensorboard is a simple script that starts Tensoarboard if you provide a directory.
+
+* There are multiple global parameters in every RL file and the environment that can be tweaked, like game speed, saving, NN size, drawing etc.
 
 ## ToDo
 * The main difficulty right now is to improve the environment. The RL algoritms were tested and should be sufficient.
 * Understand and implement Q-Learning.
 
-
+## Disclaimer
+* The environment is constantly being updated, thus saved models often are not usable anymore
