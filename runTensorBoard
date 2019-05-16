@@ -1,0 +1,1 @@
+tensorboard --logdir $1 --host localhost
