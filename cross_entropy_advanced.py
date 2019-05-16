@@ -10,7 +10,7 @@ import torch.optim as optim
 from flappyb.environment import Environment
 
 
-HIDDEN_SIZE = 128
+HIDDEN_SIZE = 64
 BATCH_SIZE = 100
 PERCENTILE = 30
 # GAMMA = 0.9

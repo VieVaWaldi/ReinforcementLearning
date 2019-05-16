@@ -29,7 +29,7 @@ class Pipe:
         self.x -= self.speed
 
     def hits(self, bird):
-        if bird.y < self.top or bird.y > self.s_height - self.bot:
+        if bird.y < self.top or bird.y > self.bot:
             if self.x < bird.x < self.x + self.width:
                 return True
 
@@ -37,7 +37,7 @@ class Pipe:
         if bird.x > self.x + self.width and not self.within_pipe:
             self.within_pipe = True
             return True
-        if not (bird.x > self.x + self.width):
+        if bird.x < self.x + self.width:
             self.within_pipe = False
 
     def off_screen(self):

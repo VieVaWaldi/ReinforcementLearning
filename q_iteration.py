@@ -11,9 +11,9 @@ RANDOM_STEPS = 5000
 
 NAME = 'flappy-bird-q-iteration-env-5000-steps-randomized-,2-,8-updated-env-fps-1'
 MODEL_PATH = 'models/{}.pt'.format(NAME)
-WRITE = True
+WRITE = False
 DRAW = False
-DRAW_TRAINING = False
+DRAW_TRAINING = True
 
 
 # Contains tabled and functions
@@ -30,9 +30,11 @@ class Agent:
     # we can only learn on full episodes (unlike cross entropy)
     def play_n_random_steps(self, count):
         rand = random.uniform(0.2,0.8)
+        print(rand)
         for _ in range(count):
             if _ % 1000 == 0:
                 rand = random.uniform(0.2,0.8)
+                print(rand)
             # action = self.env.get_action_random()  # perform random action
             action = np.random.choice((0,1), 1, p=(rand, 1-rand))   # i should do this in env
             action = action.item(0)                
