@@ -46,5 +46,5 @@ class Bird:
 			self.vel = 0
 
 	def _fly(self):
-		self.vel += -self.gravity*4
+		self.vel += -self.gravity*2
 

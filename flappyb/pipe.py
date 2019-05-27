@@ -11,9 +11,9 @@ class Pipe:
         self.s_height = s_height
         self.color = color
 
-        self.top = random.randrange(0, s_height/2)
-        self.bot = random.randrange(s_height/2, s_height)
-        self.width = 40
+        self.top = random.randrange(120, s_height-370)
+        self.bot = self.top + 350
+        self.width = 60
         self.x = s_width
         self.speed = 3
 

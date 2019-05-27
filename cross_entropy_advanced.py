@@ -9,29 +9,34 @@ import torch.optim as optim
 
 from flappyb.environment import Environment
 
-
-HIDDEN_SIZE = 64
+HIDDEN_SIZE_1 = 128
+HIDDEN_SIZE_2 = 64
 BATCH_SIZE = 100
 PERCENTILE = 30
-# GAMMA = 0.9
+LEARNING_RATE = 0.01
+GAMMA = 1
 
-NAME = 'flappy-bird-cross-entropy-advanced-64x64-real'
-MODEL_PATH = 'models/{}.pt'.format(NAME)
+NAME = 'cross-entropy-batchsize:16-hiddensize1:128'
 WRITE = False
 DRAW = True
 
+NAME = 'cross-entropy-advanced-128x64-gamma:1-learningrate:0.01'
+WRITE = False
+DRAW = True
+SAVE_MODEL = False
+
 
 class Net(nn.Module):
-    def __init__(self, obs_size, hidden_size, n_actions):
+    def __init__(self, obs_size, n_actions):
         super(Net, self).__init__()
         self.net = nn.Sequential(
-            nn.Linear(obs_size, hidden_size),
+            nn.Linear(obs_size, HIDDEN_SIZE_1),
             nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(HIDDEN_SIZE_1, HIDDEN_SIZE_2),
             nn.ReLU(),
-            nn.Linear(hidden_size, hidden_size),
+            nn.Linear(HIDDEN_SIZE_2, HIDDEN_SIZE_2),
             nn.ReLU(),
-            nn.Linear(hidden_size, n_actions)
+            nn.Linear(HIDDEN_SIZE_2, n_actions)
         )
 
     def forward(self, x):
@@ -53,6 +58,8 @@ def iterate_batches(env, net, batch_size):
         act_probs_v = sm(net(obs_v))
         act_probs = act_probs_v.data.numpy()[0]
         action = np.random.choice(len(act_probs), p=act_probs)
+        # action = env.get_action_random()
+
         next_obs, reward, is_done, _ = env.step(action)
         episode_reward += reward
         episode_steps.append(EpisodeStep(observation=obs, action=action))
@@ -91,15 +98,14 @@ if __name__ == "__main__":
     obs_size = env.get_observation_size()
     n_actions = env.get_action_size()
 
-    net = Net(obs_size, HIDDEN_SIZE, n_actions)
-    net.load_state_dict(torch.load(MODEL_PATH))
-    net.eval()
+    net = Net(obs_size, n_actions)
+    # net.load_state_dict(torch.load('models/cross_entropy/{}.pt'.format(NAME)))
+    # net.eval()
 
     objective = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(params=net.parameters(), lr=0.001)
+    optimizer = optim.Adam(params=net.parameters(), lr=LEARNING_RATE)
 
     writer = None
-
     if WRITE:
         writer = SummaryWriter(comment=NAME)
 
@@ -121,15 +127,13 @@ if __name__ == "__main__":
         print("%d: loss=%.3f, reward_mean=%.3f, reward_bound=%.3f, batch=%d" % (
             iter_no, loss_v.item(), reward_mean, reward_bound, len(full_batch)))
         if WRITE:
-            writer.add_scalar("loss", loss_v.item(), iter_no)
             writer.add_scalar("reward_mean", reward_mean, iter_no)
-            writer.add_scalar("reward_bound", reward_bound, iter_no)
-        if iter_no % 30 == 0:
+        if (iter_no % 30 == 0) and SAVE_MODEL :
+            NAME = 'NAME-PART={}'.format(iter_no)
+            torch.save(net.state_dict(), 'models/cross_entropy/{}.pt'.format(NAME))
             pass
-            # torch.save(net.state_dict(), MODEL_PATH)
-        if iter_no > 5000:
+        if iter_no > 10000:
             print("That should be enough!")
-            torch.save(net.state_dict(), MODEL_PATH)
             break
 
     if WRITE:
