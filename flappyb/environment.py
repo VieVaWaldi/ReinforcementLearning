@@ -1,35 +1,29 @@
-# Game was made with help of https://www.youtube.com/watch?v=cXgA1d_E-jY
-
-# distance breite plotten
-# 2 naechsten pipes als input geben
-
+# Game was made with the help of https://www.youtube.com/watch?v=cXgA1d_E-jY
 import time
 import pygame
 import random
 
-from flappyb.bird import Bird
-from flappyb.pipe import Pipe
-
 import numpy as np
 import torch
 
-# GAME SPEED
-FPS = 1
+from flappyb.bird import Bird
+from flappyb.pipe import Pipe
 
-
-# AI PARAMETERS
+# AI PARAMETERS #####################################################################################
 BUFFER_SIZE = 4
+OBSERVATION_SIZE = 5 
 ACTIONS = [0, 1]        
 ACTION_SIZE = 2
-OBSERVATION_SIZE = 5 * BUFFER_SIZE
-ROUND_TO_DECIMALS = 2
+# ROUND_TO_DECIMALS = 2
 
-# GAME PARAMETERS
+# GAME PARAMETERS ###################################################################################
 SCREEN_SIZE = WIDTH, HEIGHT = (640, 880)
-BACKGROUND = (0, 0, 0)
-BIRD_COLOR = (255, 0, 0)
-PIPE_COLOR = (0, 255, 0)
-NEXT_PIPE = 140
+BACKGROUND = (146, 183, 254)
+BIRD_COLOR = (241, 213, 19)
+PIPE_COLOR = (44, 176, 26)
+NEXT_PIPE = 80  # default 150, 80 looks good
+
+
 
 """ 
 Interace:
@@ -42,12 +36,17 @@ get_action_size():      obtain size of action
 """
 class Environment:
 
-    def __init__(self, draw):
+    def __init__(self, draw=True, fps=10, debug=False):
         if draw:
             pygame.init()
             pygame.display.set_caption('NN FlappyB')
 
-            self.font = pygame.font.SysFont("comicsansms", 72) # why though
+            self.font = pygame.font.SysFont("comicsansms", 72) # :)
+            self.bg = pygame.image.load("flappyb/assets/bg.png")
+
+        self.fps = fps
+        self.debug = debug
+        self.draw = draw
 
         self.clock = pygame.time.Clock()
         self.time_elapsed_since_last_action = 0
@@ -58,30 +57,23 @@ class Environment:
         self.bird = Bird(self.screen, WIDTH, HEIGHT, BIRD_COLOR)
         self.pipes = [Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR)]
 
-        self.actions = ACTIONS
         self.reward = 0
-
         self.is_done = False
-        self.draw = draw
+        self.printed_score = False
 
-        self.normalizer = Normalizer(OBSERVATION_SIZE)
-
-    # ML INTERFACE ###############################################
+    # ML INTERFACE ##################################################################################
     def reset(self):
 
         self.clock = pygame.time.Clock()
         self.time_elapsed_since_last_action = 0
         self.global_time = 0
 
-        self.screen = pygame.display.set_mode(SCREEN_SIZE)
-
         self.bird = Bird(self.screen, WIDTH, HEIGHT, BIRD_COLOR)
         self.pipes = [Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR)]
 
-        self.actions = ACTIONS
         self.reward = 0
-
         self.is_done = False
+        self.printed_score = False
 
         obs, reward, is_done, _ = self.step_buffer(0)      # lol no premium action, why did i write that ?
 
@@ -89,7 +81,7 @@ class Environment:
 
     def step(self, action):
 
-        while not self.time_elapsed_since_last_action > FPS:
+        while not self.time_elapsed_since_last_action > self.fps:
             dt = self.clock.tick()
             self.time_elapsed_since_last_action += dt
 
@@ -101,10 +93,9 @@ class Environment:
 
         obs = []
         rew = 0
-        don = False
 
         for i in range(BUFFER_SIZE):
-            while not self.time_elapsed_since_last_action > FPS:
+            while not self.time_elapsed_since_last_action > self.fps:
                 dt = self.clock.tick()
                 self.time_elapsed_since_last_action += dt
 
@@ -114,17 +105,68 @@ class Environment:
 
             for j in range(len(o)):
                 obs.append(o[j])
-            if d:
-                don = True
 
-        tensor = torch.FloatTensor(np.array(obs))    # Observation equals state        
-        self.normalizer.observe(tensor)
-        new_obs = self.normalizer.normalize(tensor)
+        # Rounding to if wanted #########################
+        # for i in range (len(new_obs)):
+            # obs[i] = round(float(new_obs[i]), 6)
+            # obs[i] = new_obs[i]
 
-        for i in range (len(new_obs)):
-            obs[i] = round(float(new_obs[i]), ROUND_TO_DECIMALS)
+        if rew > 1:
+            rew = 1
+        elif rew < -1:
+            rew = -1
+        else:
+            rew = 0.1
 
         return obs, rew, d, _
+
+    # The actual game step ##########################################################################
+    def run_ai_game_step(self, action): 
+
+        current_reward = 0.1 
+
+        if self.global_time % NEXT_PIPE == 0:
+            self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR))
+
+        for pipe in self.pipes:
+            pipe.update()
+            
+            if pipe.off_screen():
+                self.pipes.remove(pipe)
+
+            if pipe.hits(self.bird):
+                self.game_over()
+                current_reward = -1
+                hit_pipe = True
+
+            if pipe.behind(self.bird):    
+                self.reward += 1
+                current_reward = 1
+
+        self.bird.handle_events_ai(action)
+        if self.bird.update():
+            self.game_over()
+            current_reward = -1
+
+        if self.draw:
+            # self.screen.fill(BACKGROUND)
+            self.screen.blit(self.bg, (0, 0))
+            for pipe in self.pipes:
+                pipe.draw()
+            self.bird.draw()
+            text = pygame.font.SysFont("comicsansms", 28).render("SCORE {}".format(self.reward), True, (0,0,0))
+            self.screen.blit(text,  (565 - text.get_width() // 2, 30 - text.get_height() // 2))
+            pygame.display.flip()
+
+        obs = self.get_observation_space()
+        
+        if self.draw:
+            pygame.display.update()
+
+        self.time_elapsed_since_last_action = 0
+
+        return obs, current_reward, self.is_done, None
+    #################################################################################################
 
     def get_observation_space(self):
 
@@ -138,93 +180,71 @@ class Environment:
         e1 = self.bird.y                    # bird pos
         e2 = self.bird.vel                  # bird vel
         e3 = my_pipe.x - self.bird.x        # dist to Pipe  
-        e4 = my_pipe.top                    # pipe bot
-        e5 = my_pipe.bot                    # pipe top
+        e4 = my_pipe.top                    # pipe top
+        e5 = my_pipe.bot                    # pipe bot
 
-        # TURNING ON ROUNDING HELPS WITH Q-/V-ITERATION
+        if self.draw and self.debug:
+            e_d1 = pygame.rect.Rect(self.bird.x, e1, 2, HEIGHT-e1)
+            pygame.draw.rect(self.screen, (255, 0, 0), e_d1)
 
-        # obs = torch.FloatTensor(np.array([e1, e2, e3, e4, e5]))    # Observation equals state        
-        # self.normalizer.observe(obs)
-        # new_obs = self.normalizer.normalize(obs)
+            e_d2 = pygame.rect.Rect(self.bird.x-self.bird.radius, e2*2+HEIGHT/2, self.bird.x+self.bird.radius, 5)
+            pygame.draw.rect(self.screen, (255, 0, 0), e_d2)
 
-        # # nor_obs = np.interp(obs, (obs.min(), obs.max()), (0, 1))
-        # wow1 = round(float(new_obs[0]), ROUND_TO_DECIMALS)
-        # wow2 = round(float(new_obs[1]), ROUND_TO_DECIMALS)
-        # wow3 = round(float(new_obs[2]), ROUND_TO_DECIMALS)
-        # wow4 = round(float(new_obs[3]), ROUND_TO_DECIMALS)
-        # wow5 = round(float(new_obs[4]), ROUND_TO_DECIMALS)
+            e_d3 = pygame.rect.Rect(self.bird.x, self.bird.y, e3, 2)
+            pygame.draw.rect(self.screen, (255, 0, 0), e_d3)
+
+            e_d4 = pygame.rect.Rect(my_pipe.x-5, e4, my_pipe.width+10, 5)
+            pygame.draw.rect(self.screen, (255, 0, 0), e_d4)
+
+            e_d5 = pygame.rect.Rect(my_pipe.x-5, e5, my_pipe.width+10, 5)
+            pygame.draw.rect(self.screen, (255, 0, 0), e_d5)
+
+        # Normalization ###
+        e1 = e1 / HEIGHT
+        e2 = e2 / self.bird.vel_cap             
+        e3 = e3 / (WIDTH - 50)
+        e4 = e4 / HEIGHT
+        e5 = e5 / HEIGHT
 
         obs = (e1, e2, e3, e4, e5)
+        # print(obs)
         return obs
 
     def get_action_random(self):
-        rand = random.uniform(0.2, 0.8)   # more or less and he does nothing
-        action = np.random.choice((0, 1), 1, p=(rand, 1 - rand))
+        action = np.random.choice((0, 1), 1, p=(0.45, 0.55))
         return action.item(0)
 
     def get_observation_size(self):
         return OBSERVATION_SIZE
 
-    def get_actions(self):
-        return self.actions
+    def get_observation_size_buffer(self):
+        return OBSERVATION_SIZE * BUFFER_SIZE
 
-    def get_actions_q_learning(self):
-        return 1
+    def get_actions(self):
+        return ACTIONS
 
     def get_action_size(self):
         return ACTION_SIZE
 
-    # The actual game step ###
-
-    def run_ai_game_step(self, action):  # call this in loop, action = bool
-
-        current_reward = 0
-
-        if self.global_time % NEXT_PIPE == 0:
-            self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR))
-
-        for pipe in self.pipes:
-            pipe.update()
-            if pipe.off_screen():
-                self.pipes.remove(pipe)
-            if pipe.hits(self.bird):
-                if self.draw:
-                    text = self.font.render("GAME OVER! Score = {}".format(self.reward), True, (186, 0, 0))
-                    self.screen.blit(text,  (320 - text.get_width() // 2, 240 - text.get_height() // 2))
-                    pygame.display.flip()
-                    time.sleep(0.3)
-                print('Score: {}'.format(self.reward))
-
-                current_reward = -1
-                self.is_done = True
-            if pipe.behind(self.bird):
-                
-                self.reward += 1
-                current_reward = 6
-
-        self.bird.handle_events_ai(action)
-        self.bird.update()
+    def game_over(self):
+        if not self.printed_score:
+            print('Score: {}'.format(self.reward))
+            self.printed_score = True
 
         if self.draw:
-            self.screen.fill(BACKGROUND)
-            for pipe in self.pipes:
-                pipe.draw()
-            self.bird.draw()
-            pygame.display.update()
-
-        self.time_elapsed_since_last_action = 0
-
-        return self.get_observation_space(), current_reward, self.is_done, None
+            text = self.font.render("Game Over!".format(self.reward), True, (0,0,0))
+            self.screen.blit(text,  (320 - text.get_width() // 2, 240 - text.get_height() // 2))
+            pygame.display.flip()
+            time.sleep(0.4)
+        self.is_done = True
 
     # HUMAN STUFF ################################################
 
     def run_human_game(self):
 
-        TEST_VAL_FOUR = 0
-
         while not self.is_done:
 
-            while not self.time_elapsed_since_last_action > FPS:
+            while not self.time_elapsed_since_last_action > self.fps:
                 dt = self.clock.tick()
                 self.time_elapsed_since_last_action += dt
 
@@ -233,55 +253,46 @@ class Environment:
             self.screen.fill(BACKGROUND)
             self.handle_events_human()
 
+            current_reward = 0.1 
+
             if self.global_time % NEXT_PIPE == 0:
                 self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR))
 
             for pipe in self.pipes:
                 pipe.update()
-                pipe.draw()
+                
                 if pipe.off_screen():
                     self.pipes.remove(pipe)
+
                 if pipe.hits(self.bird):
-                    print('Score: {}'.format(self.reward))
-                    self.is_done = True
-                    pygame.quit()
-                if pipe.behind(self.bird):
+                    self.game_over()
+                    current_reward = -1
+
+                if pipe.behind(self.bird):    
                     self.reward += 1
+                    current_reward = 1
 
             self.bird.handle_events_human()
-            self.bird.update()
-            self.bird.draw()
+            if self.bird.update():
+                self.game_over()
+                current_reward = -1
 
-            pygame.display.update()
+            if self.draw:
+                self.screen.fill(BACKGROUND)
+                for pipe in self.pipes:
+                    pipe.draw()
+                self.bird.draw()
+
+            obs = self.get_observation_space()
+            
+            if self.draw:
+                pygame.display.update()
 
             self.time_elapsed_since_last_action = 0
-
-            # TEST_VAL_FOUR += 1
-
-            # if TEST_VAL_FOUR % 4 == 0:
-            #     time.sleep(0.5)
+            print(current_reward)
 
     def handle_events_human(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.is_done = False
                 pygame.quit()
-
-# https://discuss.pytorch.org/t/normalization-of-input-data-to-qnetwork/14800 ### Please just work
-class Normalizer():
-    def __init__(self, num_inputs):
-        self.n = torch.zeros(num_inputs)
-        self.mean = torch.zeros(num_inputs)
-        self.mean_diff = torch.zeros(num_inputs)
-        self.var = torch.zeros(num_inputs)
-
-    def observe(self, x):
-        self.n += 1.
-        last_mean = self.mean.clone()
-        self.mean += (x-self.mean)/self.n
-        self.mean_diff += (x-last_mean)*(x-self.mean)
-        self.var = torch.clamp(self.mean_diff/self.n, min=1e-2)
-
-    def normalize(self, inputs):
-        obs_std = torch.sqrt(self.var)
-        return (inputs - self.mean)/obs_std
