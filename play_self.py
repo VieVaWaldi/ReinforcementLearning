@@ -16,17 +16,17 @@ class Agent:
 
 # HUMAN PLAYS
 
-# env = Environment(True, 24)
-# env.run_human_game()
+env = Environment(True, 24)
+env.run_human_game()
 
 # RANDOM AGENT
 
-agent = Agent()
-env = Environment(True, 10)
+# agent = Agent()
+# env = Environment(True, 10)
 
-for i in range(10):
-	env.reset()
-	while not env.is_done:
-	    agent.step(env)
+# for i in range(10):
+# 	env.reset()
+# 	while not env.is_done:
+# 	    agent.step(env)
 
-print("Total reward = {}".format(agent.total_reward))
+# print("Total reward = {}".format(agent.total_reward))

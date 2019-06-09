@@ -36,7 +36,7 @@ WRITE = True
 DRAW = False
 SAVE_MODEL = True
 # XXX RIP MY CHILD XXX difference 200 is okay -> 250 # 600 is okay # 900 is funny # 1550 is op # no this is op 3550 # ! 3900 !
-LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-PART=0' 
+LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-PART=6650'    # 950 is oke # 1050 is oke 
 #####################################################################################################
 
 
@@ -134,7 +134,7 @@ def learn_flappyb():
 
 
 def play_flappyb():
-    env = Environment(True, 10, True)
+    env = Environment(True, 1, False)
 
     observation_space = env.get_observation_size_buffer()
     action_space = env.get_action_size()

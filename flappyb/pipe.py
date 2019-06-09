@@ -2,13 +2,14 @@ import random
 import pygame
 import numpy as np
 
-RANDOM_PIPES = [150,250,350,450,550,650]
+RANDOM_PIPES = [150,250,350,450,550]
 
 class Pipe:
 
     def __init__(self, screen, s_width, s_height, color):
 
-        # self.pipe_image = pygame.image.load("flappyb/assets/pipe.png") # 52x808
+        self.pipe_image = pygame.image.load("flappyb/assets/pipe.png") # 52x808
+        self.pipe_long_image = pygame.image.load("flappyb/assets/pipe_long.png") # 52x808
 
         self.screen = screen
         self.s_width = s_width
@@ -16,7 +17,7 @@ class Pipe:
         self.color = color
 
         self.top = np.random.choice(RANDOM_PIPES)
-        self.bot = self.top + 150
+        self.bot = self.top + 220
 
         # self.top = random.randrange(120, s_height-370)
         # self.bot = self.top + 350
@@ -29,13 +30,24 @@ class Pipe:
     def draw(self):
         rect_top = pygame.rect.Rect(self.x, 0, self.width, self.top)
         rect_bot = pygame.rect.Rect(self.x, self.bot, self.width, self.s_height)
-        pygame.draw.rect(self.screen, self.color, rect_top)
-        pygame.draw.rect(self.screen, self.color, rect_bot)
+        # pygame.draw.rect(self.screen, self.color, rect_top)
+        # pygame.draw.rect(self.screen, self.color, rect_bot)
 
-        # pipe_rotated = pygame.transform.rotate(self.pipe_image, 180)
-        # self.screen.blit(pipe_rotated, (self.x, self.top - 808))
-        # self.screen.blit(self.pipe_image, (self.x, self.bot))
-        
+        if self.top > 320:
+        	pipe_rotated = pygame.transform.rotate(self.pipe_image, 180)
+        	self.screen.blit(pipe_rotated, (self.x, self.top - 320))
+        	pipe_rotated_long = pygame.transform.rotate(self.pipe_long_image, 180)
+        	self.screen.blit(pipe_rotated_long, (self.x, self.top - 320 - 280))
+        else:
+        	pipe_rotated = pygame.transform.rotate(self.pipe_image, 180)
+        	self.screen.blit(pipe_rotated, (self.x, self.top - 320))
+
+        if self.s_height - self.bot > 320:
+        	self.screen.blit(self.pipe_image, (self.x, self.bot))
+        	self.screen.blit(self.pipe_long_image, (self.x, self.bot+280))
+        else:
+        	self.screen.blit(self.pipe_image, (self.x, self.bot))
+
     def update(self):
         self.x -= self.speed
 

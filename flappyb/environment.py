@@ -21,7 +21,7 @@ SCREEN_SIZE = WIDTH, HEIGHT = (640, 880)
 BACKGROUND = (146, 183, 254)
 BIRD_COLOR = (241, 213, 19)
 PIPE_COLOR = (44, 176, 26)
-NEXT_PIPE = 80  # default 150, 80 looks good
+NEXT_PIPE = 150  # default 150, 80 looks good
 
 
 
