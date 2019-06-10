@@ -21,7 +21,8 @@ SCREEN_SIZE = WIDTH, HEIGHT = (640, 880)
 BACKGROUND = (146, 183, 254)
 BIRD_COLOR = (241, 213, 19)
 PIPE_COLOR = (44, 176, 26)
-NEXT_PIPE = 150  # default 150, 80 looks good
+FONT = 'dyuthi'
+NEXT_PIPE = 60  # default is 150, hardcore is 60, HELL is 40
 
 
 
@@ -41,8 +42,11 @@ class Environment:
             pygame.init()
             pygame.display.set_caption('NN FlappyB')
 
-            self.font = pygame.font.SysFont("comicsansms", 72) # :)
+            self.font_game_over = pygame.font.SysFont("ani", 72) 
             self.bg = pygame.image.load("flappyb/assets/bg.png")
+
+            self.pipe_image = pygame.image.load("flappyb/assets/pipe.png") # 52x808
+            self.pipe_long_image = pygame.image.load("flappyb/assets/pipe_long.png") # 52x808<
 
         self.fps = fps
         self.debug = debug
@@ -55,7 +59,7 @@ class Environment:
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
 
         self.bird = Bird(self.screen, WIDTH, HEIGHT, BIRD_COLOR)
-        self.pipes = [Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR)]
+        self.pipes = [Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, self.pipe_image, self.pipe_long_image)]
 
         self.reward = 0
         self.is_done = False
@@ -69,7 +73,7 @@ class Environment:
         self.global_time = 0
 
         self.bird = Bird(self.screen, WIDTH, HEIGHT, BIRD_COLOR)
-        self.pipes = [Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR)]
+        self.pipes = [Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, self.pipe_image, self.pipe_long_image)]
 
         self.reward = 0
         self.is_done = False
@@ -126,7 +130,7 @@ class Environment:
         current_reward = 0.1 
 
         if self.global_time % NEXT_PIPE == 0:
-            self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR))
+            self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, self.pipe_image, self.pipe_long_image))
 
         for pipe in self.pipes:
             pipe.update()
@@ -153,8 +157,8 @@ class Environment:
             self.screen.blit(self.bg, (0, 0))
             for pipe in self.pipes:
                 pipe.draw()
-            self.bird.draw()
-            text = pygame.font.SysFont("comicsansms", 28).render("SCORE {}".format(self.reward), True, (0,0,0))
+            self.bird.draw(self.reward)
+            text = pygame.font.SysFont(FONT, 28).render("SCORE {}".format(self.reward), True, (0,0,0))
             self.screen.blit(text,  (565 - text.get_width() // 2, 30 - text.get_height() // 2))
             pygame.display.flip()
 
@@ -170,7 +174,7 @@ class Environment:
 
     def get_observation_space(self):
 
-        my_pipe = Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR)
+        my_pipe = Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, None, None)
         my_pipe.x = 9999
 
         for pipe in self.pipes:
@@ -232,7 +236,7 @@ class Environment:
             self.printed_score = True
 
         if self.draw:
-            text = self.font.render("Game Over!".format(self.reward), True, (0,0,0))
+            text = pygame.font.SysFont(FONT, 28).render("Game Over!".format(self.reward), True, (0,0,0))
             self.screen.blit(text,  (320 - text.get_width() // 2, 240 - text.get_height() // 2))
             pygame.display.flip()
             time.sleep(0.4)
@@ -256,7 +260,7 @@ class Environment:
             current_reward = 0.1 
 
             if self.global_time % NEXT_PIPE == 0:
-                self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR))
+                self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, self.pipe_image, self.pipe_long_image))
 
             for pipe in self.pipes:
                 pipe.update()
@@ -281,7 +285,7 @@ class Environment:
                 self.screen.fill(BACKGROUND)
                 for pipe in self.pipes:
                     pipe.draw()
-                self.bird.draw()
+                self.bird.draw(self.reward)
 
             obs = self.get_observation_space()
             

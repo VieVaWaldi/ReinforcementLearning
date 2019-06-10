@@ -28,15 +28,17 @@ BATCH_SIZE = 20
 
 EXPLORATION_MAX = 1
 EXPLORATION_MIN = 0.01
-EXPLORATION_DECAY = 0.99995
+EXPLORATION_DECAY = 0.999995
 
 #####################################################################################################
-NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization'
+NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HARDCORE'
 WRITE = True
 DRAW = False
 SAVE_MODEL = True
 # XXX RIP MY CHILD XXX difference 200 is okay -> 250 # 600 is okay # 900 is funny # 1550 is op # no this is op 3550 # ! 3900 !
-LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-PART=6650'    # 950 is oke # 1050 is oke 
+# LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-PART=6650'   # KING # 950 is oke # 1050 is oke # 6650 My baby is back <3
+LOAD_NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HARDCORE-PART=6300'  # 2600 is pretty good # 6300 is god
+
 #####################################################################################################
 
 
@@ -125,7 +127,7 @@ def learn_flappyb():
                 	writer.add_scalar("reward", reward_score, run)
                 break
             dqn_solver.experience_replay()
-        if (run % 50 == 0) and SAVE_MODEL:
+        if (run % 100 == 0) and SAVE_MODEL:
             name = '{}-PART={}'.format(NAME, run)
             dqn_solver.model.save('models/dqn/{}.h5'.format(name))
     if WRITE:

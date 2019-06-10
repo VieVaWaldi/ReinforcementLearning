@@ -25,6 +25,11 @@ class Bird():
 		self.bottom = s_height-20
 		self.vel_cap = 20
 
+		self.salto = False
+		self.rotation = 0
+		self.last_rotation = 0
+		self.last_reward = 0
+
 	def handle_events_human(self):
 		keys = pygame.key.get_pressed()
 		if keys[pygame.K_SPACE]:
@@ -36,7 +41,7 @@ class Bird():
 		else:
 			pass
 
-	def draw(self):
+	def draw(self, reward):
 		# pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.radius)
 
 		# bottom = pygame.rect.Rect(0, self.bottom, self.s_width, 20)
@@ -44,12 +49,32 @@ class Bird():
 
 		surf = None
 
-		if self.vel > 0:
-			surf = pygame.transform.rotate(self.bird_image, -40)
-		else: 
-			surf = pygame.transform.rotate(self.bird_image, 40)
+		if reward % 10 == 0 and reward is not self.last_reward: 
+			self.last_reward = reward
+			self.salto = True
 
-		# self.rotate += 10
+		if self.salto:
+			if self.last_rotation >= 0:
+				self.rotation += 15
+				surf = pygame.transform.rotate(self.bird_image, self.rotation)	
+				if self.rotation == 400:
+					self.salto = False
+			else:
+				self.rotation -= 15
+				surf = pygame.transform.rotate(self.bird_image, self.rotation)	
+				if self.rotation == -400:
+					self.salto = False
+
+		elif self.vel > 0:
+			self.rotation = -40
+			self.last_rotation = self.rotation
+			surf = pygame.transform.rotate(self.bird_image, self.rotation)
+		
+		else:
+			self.rotation = 40
+			self.last_rotation = self.rotation
+			surf = pygame.transform.rotate(self.bird_image, self.rotation)
+
 		self.screen.blit(surf, (self.x - 25, self.y - 20))
 
 	def update(self):

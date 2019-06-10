@@ -6,10 +6,10 @@ RANDOM_PIPES = [150,250,350,450,550]
 
 class Pipe:
 
-    def __init__(self, screen, s_width, s_height, color):
+    def __init__(self, screen, s_width, s_height, color, pipe_image, pipe_long_image):
 
-        self.pipe_image = pygame.image.load("flappyb/assets/pipe.png") # 52x808
-        self.pipe_long_image = pygame.image.load("flappyb/assets/pipe_long.png") # 52x808
+        self.pipe_image = pipe_image # 52x808
+        self.pipe_long_image = pipe_long_image # 52x808
 
         self.screen = screen
         self.s_width = s_width
