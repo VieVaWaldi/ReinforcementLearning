@@ -6,7 +6,7 @@ RANDOM_PIPES = [150,250,350,450,550]
 
 class Pipe:
 
-    def __init__(self, screen, s_width, s_height, color, pipe_image, pipe_long_image):
+    def __init__(self, screen, s_width, s_height, color, pipe_image=None, pipe_long_image=None):
 
         self.pipe_image = pipe_image # 52x808
         self.pipe_long_image = pipe_long_image # 52x808
@@ -28,8 +28,8 @@ class Pipe:
         self.within_pipe = False
 
     def draw(self):
-        rect_top = pygame.rect.Rect(self.x, 0, self.width, self.top)
-        rect_bot = pygame.rect.Rect(self.x, self.bot, self.width, self.s_height)
+        # rect_top = pygame.rect.Rect(self.x, 0, self.width, self.top)
+        # rect_bot = pygame.rect.Rect(self.x, self.bot, self.width, self.s_height)
         # pygame.draw.rect(self.screen, self.color, rect_top)
         # pygame.draw.rect(self.screen, self.color, rect_bot)
 

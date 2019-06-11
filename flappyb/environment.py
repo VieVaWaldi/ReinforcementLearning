@@ -22,7 +22,7 @@ BACKGROUND = (146, 183, 254)
 BIRD_COLOR = (241, 213, 19)
 PIPE_COLOR = (44, 176, 26)
 FONT = 'dyuthi'
-NEXT_PIPE = 60  # default is 150, hardcore is 60, HELL is 40
+# NEXT_PIPE = 40  # default is 150, hardcore is 60, HELL is 40
 
 
 
@@ -37,7 +37,11 @@ get_action_size():      obtain size of action
 """
 class Environment:
 
-    def __init__(self, draw=True, fps=10, debug=False):
+    def __init__(self, draw=True, fps=10, debug=False, next_pipe=150):
+
+        self.pipe_image = None
+        self.pipe_long_image = None
+
         if draw:
             pygame.init()
             pygame.display.set_caption('NN FlappyB')
@@ -51,6 +55,7 @@ class Environment:
         self.fps = fps
         self.debug = debug
         self.draw = draw
+        self.next_pipe = next_pipe
 
         self.clock = pygame.time.Clock()
         self.time_elapsed_since_last_action = 0
@@ -129,7 +134,7 @@ class Environment:
 
         current_reward = 0.1 
 
-        if self.global_time % NEXT_PIPE == 0:
+        if self.global_time % self.next_pipe == 0:
             self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, self.pipe_image, self.pipe_long_image))
 
         for pipe in self.pipes:
@@ -178,7 +183,7 @@ class Environment:
         my_pipe.x = 9999
 
         for pipe in self.pipes:
-            if (pipe.x < my_pipe.x) and pipe.x >= (self.bird.x - pipe.width):
+            if (pipe.x < my_pipe.x) and pipe.x >= (self.bird.x): #  - pipe.width): # target next pipe immediately
                 my_pipe = pipe
 
         e1 = self.bird.y                    # bird pos
@@ -259,7 +264,7 @@ class Environment:
 
             current_reward = 0.1 
 
-            if self.global_time % NEXT_PIPE == 0:
+            if self.global_time % self.next_pipe == 0:
                 self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, self.pipe_image, self.pipe_long_image))
 
             for pipe in self.pipes:

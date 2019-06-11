@@ -20,7 +20,7 @@ from flappyb.environment import Environment
 from tensorboardX import SummaryWriter
     
 GAMMA = 0.9             # try .99
-LEARNING_RATE = 0.001   # deafult was 0.001 
+LEARNING_RATE = 0.001   # default was 0.001 
 LEARNING_WITH_DECAY = 0.01    
 
 MEMORY_SIZE = 1000000
@@ -31,13 +31,16 @@ EXPLORATION_MIN = 0.01
 EXPLORATION_DECAY = 0.999995
 
 #####################################################################################################
-NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HARDCORE'
+NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HELL'
 WRITE = True
 DRAW = False
 SAVE_MODEL = True
+
 # XXX RIP MY CHILD XXX difference 200 is okay -> 250 # 600 is okay # 900 is funny # 1550 is op # no this is op 3550 # ! 3900 !
-# LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-PART=6650'   # KING # 950 is oke # 1050 is oke # 6650 My baby is back <3
-LOAD_NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HARDCORE-PART=6300'  # 2600 is pretty good # 6300 is god
+
+# LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-PART=6650' # THIS_PIPE                  # 950 is oke # 1050 is oke # 6650 My baby is back <3
+# LOAD_NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HARDCORE-PART=6300' # THIS_PIPE        # 2600 is pretty good # 6300 is god
+LOAD_NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HELL-PART=5500' # NEXT_PIPE            # 5500 is good
 
 #####################################################################################################
 
@@ -136,7 +139,7 @@ def learn_flappyb():
 
 
 def play_flappyb():
-    env = Environment(True, 1, False)
+    env = Environment(True, 1, True, 40)
 
     observation_space = env.get_observation_size_buffer()
     action_space = env.get_action_size()
@@ -158,7 +161,7 @@ def play_flappyb():
 
 
 if __name__ == "__main__":
-    # learn_flappyb()
-    play_flappyb()
+    learn_flappyb()
+    # play_flappyb()
     
     print('Jobe Done!')
