@@ -11,10 +11,10 @@ from flappyb.pipe import Pipe
 
 # AI PARAMETERS #####################################################################################
 BUFFER_SIZE = 4
-OBSERVATION_SIZE = 5 
-ACTIONS = [0, 1]        
+OBSERVATION_SIZE = 5
+ACTIONS = [0, 1]
 ACTION_SIZE = 2
-# ROUND_TO_DECIMALS = 2
+ROUND_TO_DECIMALS = 2
 
 # GAME PARAMETERS ###################################################################################
 SCREEN_SIZE = WIDTH, HEIGHT = (640, 880)
@@ -26,7 +26,7 @@ FONT = 'dyuthi'
 
 
 
-""" 
+"""
 Interace:
 reset():                resets the whole environment
 step(action):           performs one action onto the environment
@@ -37,7 +37,7 @@ get_action_size():      obtain size of action
 """
 class Environment:
 
-    def __init__(self, draw=True, fps=10, debug=False, next_pipe=150):
+    def __init__(self, draw=True, fps=10, debug=False, next_pipe=150, obs_this_pipe=True):
 
         self.pipe_image = None
         self.pipe_long_image = None
@@ -46,7 +46,7 @@ class Environment:
             pygame.init()
             pygame.display.set_caption('NN FlappyB')
 
-            self.font_game_over = pygame.font.SysFont("ani", 72) 
+            self.font_game_over = pygame.font.SysFont("ani", 72)
             self.bg = pygame.image.load("flappyb/assets/bg.png")
 
             self.pipe_image = pygame.image.load("flappyb/assets/pipe.png") # 52x808
@@ -56,6 +56,7 @@ class Environment:
         self.debug = debug
         self.draw = draw
         self.next_pipe = next_pipe
+        self.obs_this_pipe = obs_this_pipe
 
         self.clock = pygame.time.Clock()
         self.time_elapsed_since_last_action = 0
@@ -96,7 +97,16 @@ class Environment:
 
         self.global_time += 1
 
-        return self.run_ai_game_step(action)
+        obs, rew, d, _ = self.run_ai_game_step(action)
+
+        if rew >= 1:
+            rew = 0.25
+        elif rew <= -1:
+            rew = -0.25
+        else:
+            rew = 0.025
+
+        return obs, rew, d, _
 
     def step_buffer(self, action):
 
@@ -115,11 +125,6 @@ class Environment:
             for j in range(len(o)):
                 obs.append(o[j])
 
-        # Rounding to if wanted #########################
-        # for i in range (len(new_obs)):
-            # obs[i] = round(float(new_obs[i]), 6)
-            # obs[i] = new_obs[i]
-
         if rew > 1:
             rew = 1
         elif rew < -1:
@@ -130,16 +135,16 @@ class Environment:
         return obs, rew, d, _
 
     # The actual game step ##########################################################################
-    def run_ai_game_step(self, action): 
+    def run_ai_game_step(self, action):
 
-        current_reward = 0.1 
+        current_reward = 0.1
 
         if self.global_time % self.next_pipe == 0:
             self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, self.pipe_image, self.pipe_long_image))
 
         for pipe in self.pipes:
             pipe.update()
-            
+
             if pipe.off_screen():
                 self.pipes.remove(pipe)
 
@@ -148,7 +153,7 @@ class Environment:
                 current_reward = -1
                 hit_pipe = True
 
-            if pipe.behind(self.bird):    
+            if pipe.behind(self.bird):
                 self.reward += 1
                 current_reward = 1
 
@@ -168,7 +173,7 @@ class Environment:
             pygame.display.flip()
 
         obs = self.get_observation_space()
-        
+
         if self.draw:
             pygame.display.update()
 
@@ -182,13 +187,18 @@ class Environment:
         my_pipe = Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, None, None)
         my_pipe.x = 9999
 
-        for pipe in self.pipes:
-            if (pipe.x < my_pipe.x) and pipe.x >= (self.bird.x): #  - pipe.width): # target next pipe immediately
-                my_pipe = pipe
+        if self.obs_this_pipe:
+            for pipe in self.pipes:
+                if (pipe.x < my_pipe.x) and pipe.x >= (self.bird.x - pipe.width): 
+                    my_pipe = pipe
+        else:
+            for pipe in self.pipes:
+                if (pipe.x < my_pipe.x) and pipe.x >= (self.bird.x): # target next pipe immediately
+                    my_pipe = pipe
 
         e1 = self.bird.y                    # bird pos
         e2 = self.bird.vel                  # bird vel
-        e3 = my_pipe.x - self.bird.x        # dist to Pipe  
+        e3 = my_pipe.x - self.bird.x        # dist to Pipe
         e4 = my_pipe.top                    # pipe top
         e5 = my_pipe.bot                    # pipe bot
 
@@ -210,13 +220,23 @@ class Environment:
 
         # Normalization ###
         e1 = e1 / HEIGHT
-        e2 = e2 / self.bird.vel_cap             
+        e2 = e2 / self.bird.vel_cap
         e3 = e3 / (WIDTH - 50)
         e4 = e4 / HEIGHT
         e5 = e5 / HEIGHT
 
+        # Nomralizatoin with rounding
+        # e1 = round(e1 / HEIGHT, ROUND_TO_DECIMALS)
+        # e2 = round(e2 / self.bird.vel_cap, ROUND_TO_DECIMALS)
+        # e3 = round(e3 / (WIDTH - 50), ROUND_TO_DECIMALS)
+        # e4 = round(e4 / HEIGHT, ROUND_TO_DECIMALS)
+        # e5 = round(e5 / HEIGHT, ROUND_TO_DECIMALS)
+
         obs = (e1, e2, e3, e4, e5)
         # print(obs)
+
+        ##### round in here
+
         return obs
 
     def get_action_random(self):
@@ -262,14 +282,14 @@ class Environment:
             self.screen.fill(BACKGROUND)
             self.handle_events_human()
 
-            current_reward = 0.1 
+            current_reward = 0.1
 
             if self.global_time % self.next_pipe == 0:
                 self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, self.pipe_image, self.pipe_long_image))
 
             for pipe in self.pipes:
                 pipe.update()
-                
+
                 if pipe.off_screen():
                     self.pipes.remove(pipe)
 
@@ -277,7 +297,7 @@ class Environment:
                     self.game_over()
                     current_reward = -1
 
-                if pipe.behind(self.bird):    
+                if pipe.behind(self.bird):
                     self.reward += 1
                     current_reward = 1
 
@@ -293,7 +313,7 @@ class Environment:
                 self.bird.draw(self.reward)
 
             obs = self.get_observation_space()
-            
+
             if self.draw:
                 pygame.display.update()
 

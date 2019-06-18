@@ -13,8 +13,9 @@ GAMMA = .9
 TEST_EPISODES = 5
 TRAINING_STEPS = 3000
 
-NAME = 'value-iteration-gamma=0.9-trainingsteps:3000'
-WRITE = False
+NAME = 'v_iteration/gamma=0.9-trainingsteps:3000-rounding=None'
+# NAME = 'v_iteration/gamma=0.9-trainingsteps:3000-rounding=2'
+WRITE = True
 DRAW_TRAINING = False
 DRAW = False
 
@@ -98,7 +99,7 @@ if __name__ == "__main__":
         if reward > best_reward:
             print("Best reward updated %.3f -> %.3f" % (best_reward, reward))
             best_reward = reward
-        if reward > 5.0:
+        if reward > 500:
             print("Solved in %d iterations!" % iter_no)
             break
     if WRITE:

@@ -26,21 +26,27 @@ LEARNING_WITH_DECAY = 0.01
 MEMORY_SIZE = 1000000
 BATCH_SIZE = 20
 
-EXPLORATION_MAX = 1
+EXPLORATION_MAX = 0.4
 EXPLORATION_MIN = 0.01
-EXPLORATION_DECAY = 0.999995
+EXPLORATION_DECAY = 0.99995
 
 #####################################################################################################
-NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HELL'
+LEARN = False
+
+NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-LOADED=HARDCORE-6300-lrMax=0.4-nextPipe-HELL'
 WRITE = True
 DRAW = False
 SAVE_MODEL = True
 
+OBS_THIS_PIPE_PLAY = True
+DIFFICULTY_LEARN = 40
+DIFFICULTY_PLAY = 40    # 160 # 70 # 40
+
 # XXX RIP MY CHILD XXX difference 200 is okay -> 250 # 600 is okay # 900 is funny # 1550 is op # no this is op 3550 # ! 3900 !
 
-# LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-PART=6650' # THIS_PIPE                  # 950 is oke # 1050 is oke # 6650 My baby is back <3
-# LOAD_NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HARDCORE-PART=6300' # THIS_PIPE        # 2600 is pretty good # 6300 is god
-LOAD_NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HELL-PART=5500' # NEXT_PIPE            # 5500 is good
+# LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-PART=6650' # THIS_PIPE                              # 950 is oke # 1050 is oke # 6650 My baby is back <3
+# LOAD_NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HARDCORE-PART=6300' # THIS_PIPE                    # 2600 is pretty good # 6300 is god
+LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-LOADED=HARDCORE-6300-lrMax=0.4-nextPipe-HELL-PART=1000' # NEXT_PIPE # 1000 is good!
 
 #####################################################################################################
 
@@ -97,16 +103,17 @@ class DQNSolver:
 
 
 def learn_flappyb():
-    env = Environment(DRAW, 1, False)
+    env = Environment(DRAW, 1, False, DIFFICULTY_LEARN)
     writer = None
     if WRITE:
         writer = SummaryWriter(comment=NAME)
     observation_space = env.get_observation_size_buffer()
     action_space = env.get_action_size()
     
-    #model = load_model('models/dqn/newenv/{}.h5'.format(LOAD_NAME))
-    dqn_solver = DQNSolver(observation_space, action_space) #, model)
+    model = load_model('models/dqn/{}.h5'.format(LOAD_NAME))
+    dqn_solver = DQNSolver(observation_space, action_space, model)
     run = 0
+    
     if SAVE_MODEL:
             name = '{}-PART={}'.format(NAME, run)
             dqn_solver.model.save('models/dqn/{}.h5'.format(name))
@@ -116,6 +123,7 @@ def learn_flappyb():
         state = np.reshape(state, [1, observation_space])
         step = 0
         reward_score = 0
+
         while True:
             step += 1
             action = dqn_solver.act(state, env)
@@ -139,7 +147,7 @@ def learn_flappyb():
 
 
 def play_flappyb():
-    env = Environment(True, 1, True, 40)
+    env = Environment(True, 1, True, DIFFICULTY_PLAY, OBS_THIS_PIPE_PLAY)
 
     observation_space = env.get_observation_size_buffer()
     action_space = env.get_action_size()
@@ -161,7 +169,9 @@ def play_flappyb():
 
 
 if __name__ == "__main__":
-    learn_flappyb()
-    # play_flappyb()
+    if LEARN:
+        learn_flappyb()
+    else:
+        play_flappyb()
     
     print('Jobe Done!')

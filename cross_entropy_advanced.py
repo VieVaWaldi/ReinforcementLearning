@@ -9,21 +9,17 @@ import torch.optim as optim
 
 from flappyb.environment import Environment
 
-HIDDEN_SIZE_1 = 128
-HIDDEN_SIZE_2 = 64
+HIDDEN_SIZE_1 = 256
 BATCH_SIZE = 100
 PERCENTILE = 30
 LEARNING_RATE = 0.01
-GAMMA = 1
+GAMMA = .99
 
-NAME = 'cross-entropy-batchsize:16-hiddensize1:128'
-WRITE = False
-DRAW = True
-
-NAME = 'cross-entropy-advanced-128x64-gamma:1-learningrate:0.01'
-WRITE = False
-DRAW = True
-SAVE_MODEL = False
+NAME = 'batchsize=100-hiddensize=256-lr=0.01-gamma=.9'
+NAME = 'batchsize=100-hiddensize=256-lr=0.01-gamma=.99'
+WRITE = True
+DRAW = False
+SAVE_MODEL = True
 
 
 class Net(nn.Module):
@@ -32,11 +28,9 @@ class Net(nn.Module):
         self.net = nn.Sequential(
             nn.Linear(obs_size, HIDDEN_SIZE_1),
             nn.ReLU(),
-            nn.Linear(HIDDEN_SIZE_1, HIDDEN_SIZE_2),
+            nn.Linear(HIDDEN_SIZE_1, HIDDEN_SIZE_1),
             nn.ReLU(),
-            nn.Linear(HIDDEN_SIZE_2, HIDDEN_SIZE_2),
-            nn.ReLU(),
-            nn.Linear(HIDDEN_SIZE_2, n_actions)
+            nn.Linear(HIDDEN_SIZE_1, n_actions)
         )
 
     def forward(self, x):
@@ -57,8 +51,8 @@ def iterate_batches(env, net, batch_size):
         obs_v = torch.FloatTensor([obs])
         act_probs_v = sm(net(obs_v))
         act_probs = act_probs_v.data.numpy()[0]
-        action = np.random.choice(len(act_probs), p=act_probs)
-        # action = env.get_action_random()
+        # action = np.random.choice(len(act_probs), p=act_probs)
+        action = env.get_action_random()
 
         next_obs, reward, is_done, _ = env.step(action)
         episode_reward += reward
@@ -75,8 +69,8 @@ def iterate_batches(env, net, batch_size):
 
 
 def filter_batch(batch, percentile):
-    # disc_rewards = list(map(lambda s: s.reward * (GAMMA ** len(s.steps)), batch))
-    disc_rewards = list(map(lambda s: s.reward * (len(s.steps)), batch))
+    disc_rewards = list(map(lambda s: s.reward * (GAMMA ** len(s.steps)), batch))
+    # disc_rewards = list(map(lambda s: s.reward * (len(s.steps)), batch))
     reward_bound = np.percentile(disc_rewards, percentile)
 
     train_obs = []
@@ -101,6 +95,8 @@ if __name__ == "__main__":
     net = Net(obs_size, n_actions)
     # net.load_state_dict(torch.load('models/cross_entropy/{}.pt'.format(NAME)))
     # net.eval()
+
+    torch.save(net.state_dict(), 'models/cross_entropy/{}-PART=0.pt'.format(NAME))
 
     objective = nn.CrossEntropyLoss()
     optimizer = optim.Adam(params=net.parameters(), lr=LEARNING_RATE)
@@ -127,10 +123,9 @@ if __name__ == "__main__":
         print("%d: loss=%.3f, reward_mean=%.3f, reward_bound=%.3f, batch=%d" % (
             iter_no, loss_v.item(), reward_mean, reward_bound, len(full_batch)))
         if WRITE:
-            writer.add_scalar("reward_mean", reward_mean, iter_no)
+            writer.add_scalar("reward", reward_mean, iter_no)
         if (iter_no % 30 == 0) and SAVE_MODEL :
-            NAME = 'NAME-PART={}'.format(iter_no)
-            torch.save(net.state_dict(), 'models/cross_entropy/{}.pt'.format(NAME))
+            torch.save(net.state_dict(), 'models/cross_entropy/{}-PART={}.pt'.format(NAME, iter_no))
             pass
         if iter_no > 10000:
             print("That should be enough!")
