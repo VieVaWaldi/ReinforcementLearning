@@ -13,8 +13,8 @@ GAMMA = .9
 TEST_EPISODES = 5
 TRAINING_STEPS = 3000
 
-NAME = 'v_iteration/gamma=0.9-trainingsteps:3000-rounding=None'
-# NAME = 'v_iteration/gamma=0.9-trainingsteps:3000-rounding=2'
+# NAME = 'gamma=0.9-trainingsteps:3000-rounding=None'
+NAME = 'gamma=0.9-trainingsteps:3000-rounding=2'
 WRITE = True
 DRAW_TRAINING = False
 DRAW = False
@@ -80,7 +80,7 @@ if __name__ == "__main__":
     agent = Agent()
     writer = None
     if WRITE:
-        writer = SummaryWriter(comment=NAME)
+        writer = SummaryWriter(comment='v_iteration/{}'.format(NAME))
 
     iter_no = 0
     best_reward = 0.0

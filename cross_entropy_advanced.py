@@ -17,9 +17,9 @@ GAMMA = .99
 
 NAME = 'batchsize=100-hiddensize=256-lr=0.01-gamma=.9'
 NAME = 'batchsize=100-hiddensize=256-lr=0.01-gamma=.99'
-WRITE = True
+WRITE = False
 DRAW = False
-SAVE_MODEL = True
+SAVE_MODEL = False
 
 
 class Net(nn.Module):
@@ -93,10 +93,10 @@ if __name__ == "__main__":
     n_actions = env.get_action_size()
 
     net = Net(obs_size, n_actions)
-    # net.load_state_dict(torch.load('models/cross_entropy/{}.pt'.format(NAME)))
-    # net.eval()
+    net.load_state_dict(torch.load('models/cross_entropy/{}-PART=240.pt'.format(NAME)))
+    net.eval()
 
-    torch.save(net.state_dict(), 'models/cross_entropy/{}-PART=0.pt'.format(NAME))
+    # torch.save(net.state_dict(), 'models/cross_entropy/{}-PART=0.pt'.format(NAME))
 
     objective = nn.CrossEntropyLoss()
     optimizer = optim.Adam(params=net.parameters(), lr=LEARNING_RATE)

@@ -85,7 +85,7 @@ class Environment:
         self.is_done = False
         self.printed_score = False
 
-        obs, reward, is_done, _ = self.step_buffer(0)      # lol no premium action, why did i write that ?
+        obs, reward, is_done, _ = self.step(0) #_buffer(0)     
 
         return obs
 
@@ -226,16 +226,14 @@ class Environment:
         e5 = e5 / HEIGHT
 
         # Nomralizatoin with rounding
-        # e1 = round(e1 / HEIGHT, ROUND_TO_DECIMALS)
-        # e2 = round(e2 / self.bird.vel_cap, ROUND_TO_DECIMALS)
-        # e3 = round(e3 / (WIDTH - 50), ROUND_TO_DECIMALS)
-        # e4 = round(e4 / HEIGHT, ROUND_TO_DECIMALS)
-        # e5 = round(e5 / HEIGHT, ROUND_TO_DECIMALS)
+        # e1 = round(e1, ROUND_TO_DECIMALS)
+        # e2 = round(e2, ROUND_TO_DECIMALS)
+        # e3 = round(e3, ROUND_TO_DECIMALS)
+        # e4 = round(e4, ROUND_TO_DECIMALS)
+        # e5 = round(e5, ROUND_TO_DECIMALS)
 
         obs = (e1, e2, e3, e4, e5)
         # print(obs)
-
-        ##### round in here
 
         return obs
 
