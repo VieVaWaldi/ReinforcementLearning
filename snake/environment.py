@@ -11,21 +11,20 @@ from apple import Apple
 
 # AI PARAMETERS #####################################################################################
 BUFFER_SIZE = 4
-OBSERVATION_SIZE = 5 
-ACTIONS = [0, 1, 2, 3]        
+OBSERVATION_SIZE = 5
+ACTIONS = [0, 1, 2, 3]
 ACTION_SIZE = 4
 
 # GAME PARAMETERS ###################################################################################
 SCALE = 40
 SCREEN_SIZE = WIDTH, HEIGHT = (600, 600)
-BACKGROUND = (72,72,72)
+BACKGROUND = (72, 72, 72)
 SNAKE_COLOR = (57, 255, 20)
 APPPLE_COLOR = (255, 8, 0)
 FONT = 'dyuthi'
 
 
-
-""" 
+"""
 Interace:
 reset():                resets the whole environment
 step(action):           performs one action onto the environment
@@ -34,6 +33,8 @@ get_action_random():    obtain an imporoved random action
 get_observation_size(): obtain size of observation
 get_action_size():      obtain size of action
 """
+
+
 class Environment:
 
     def __init__(self, draw=True, fps=10, debug=False):
@@ -41,7 +42,7 @@ class Environment:
             pygame.init()
             pygame.display.set_caption('NN Snake')
 
-            self.font_game_over = pygame.font.SysFont("ani", 72) 
+            self.font_game_over = pygame.font.SysFont("ani", 72)
 
         self.fps = fps
         self.debug = debug
@@ -77,7 +78,8 @@ class Environment:
         self.is_done = False
         self.printed_score = False
 
-        obs, reward, is_done, _ = self.step_buffer(0)      # lol no premium action, why did i write that ?
+        # lol no premium action, why did i write that ?
+        obs, reward, is_done, _ = self.step_buffer(0)
 
         return obs
 
@@ -118,9 +120,9 @@ class Environment:
         return obs, rew, d, _
 
     # The actual game step ##########################################################################
-    def run_ai_game_step(self, action): 
+    def run_ai_game_step(self, action):
 
-        current_reward = 0.1 
+        current_reward = 0.1
 
         # snake logic
         self.snake.handle_events_human()
@@ -131,12 +133,14 @@ class Environment:
 
             self.snake.draw()
 
-            text = pygame.font.SysFont(FONT, 28).render("SCORE {}".format(self.reward), True, (0,0,0))
-            self.screen.blit(text,  (565 - text.get_width() // 2, 30 - text.get_height() // 2))
+            text = pygame.font.SysFont(FONT, 28).render(
+                "SCORE {}".format(self.reward), True, (0, 0, 0))
+            self.screen.blit(text, (565 - text.get_width() //
+                                    2, 30 - text.get_height() // 2))
             pygame.display.flip()
 
         obs = self.get_observation_space()
-        
+
         if self.draw:
             pygame.display.update()
 
@@ -173,8 +177,10 @@ class Environment:
             self.printed_score = True
 
         if self.draw:
-            text = pygame.font.SysFont(FONT, 28).render("Game Over!".format(self.reward), True, (0,0,0))
-            self.screen.blit(text,  (320 - text.get_width() // 2, 240 - text.get_height() // 2))
+            text = pygame.font.SysFont(FONT, 28).render(
+                "Game Over!".format(self.reward), True, (0, 0, 0))
+            self.screen.blit(text, (320 - text.get_width() //
+                                    2, 240 - text.get_height() // 2))
             pygame.display.flip()
             time.sleep(0.4)
         self.is_done = True
@@ -204,7 +210,7 @@ class Environment:
                 self.screen.fill(BACKGROUND)
                 self.snake.draw()
                 self.apple.draw()
-            
+
             if self.draw:
                 pygame.display.update()
 
@@ -215,6 +221,7 @@ class Environment:
             if event.type == pygame.QUIT:
                 self.is_done = False
                 pygame.quit()
+
 
 env = Environment(True, 80, True)
 env.run_human_game()

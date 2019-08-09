@@ -16,7 +16,8 @@ class Agent:
 
 # HUMAN PLAYS
 
-env = Environment(True, 24)
+env = Environment(draw=True, fps=20, debug=True, dist_to_pipe=40,
+                  dist_between_pipes=150, obs_this_pipe=True)
 env.run_human_game()
 
 # RANDOM AGENT
