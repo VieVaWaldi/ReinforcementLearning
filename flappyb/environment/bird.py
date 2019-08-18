@@ -5,7 +5,7 @@ class Bird():
 
     def __init__(self, screen, s_width, s_height, color):
 
-        self.bird_image = pygame.image.load("flappyb/assets/bird.png")  # 50x35
+        self.bird_image = pygame.image.load("environment/assets/bird.png")
         self.rotate = 1
 
         self.screen = screen
@@ -20,7 +20,7 @@ class Bird():
         self.y = int(s_height / 2)
 
         self.vel = 0
-        self.gravity = 2  # default is 1
+        self.gravity = 2.5  # default is 1
 
         self.bottom = s_height - 20
         self.vel_cap = 20
@@ -42,10 +42,6 @@ class Bird():
             pass
 
     def draw(self, reward):
-        # pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.radius)
-
-        # bottom = pygame.rect.Rect(0, self.bottom, self.s_width, 20)
-        # pygame.draw.rect(self.screen, (120, 72, 0), bottom)
 
         surf = None
 

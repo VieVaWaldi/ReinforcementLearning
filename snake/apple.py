@@ -3,6 +3,9 @@
 import pygame
 import random
 
+# ToDo:
+# check if there is already a snake
+
 
 class Apple:
 

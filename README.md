@@ -1,30 +1,21 @@
 # Reinforcment Learning
 
-This is mostly for myself, thus there wont be too much documentation. 
-
 The algorithms were implemented using the book: "Deep Reinforcement Learning Hands-On" written by Maxim Lapan.
-He provided a github repo with multiple implementations, that can be found in here:
+He provides a github repo with multiple implementations, that can be found in here:
 https://github.com/PacktPublishing/Deep-Reinforcement-Learning-Hands-On
 
 ## Project structure
 
 The root folder consits of:
-1. Different RL implementations
-2. The environment
-3. Trained models
-4. Runs
+1. Different games, every game has an AI, models and graphs
+2. requirements.txt (probably not up to date)
+3. runTensorBoard {dir}, runs tensorboard on a choosen directory
 
-## Explanations
-* main.py is to play the game yourself
-* The environment is a flappy bird clone, i tried to follow Open-Ai's approach when implementing the interface.
-* /Runs is a log that plots the learning process via Tensorboard. 
-* runTensorboard is a simple script that starts Tensoarboard if you provide a directory.
-
-* There are multiple global parameters in every RL file and the environment that can be tweaked, like game speed, saving, NN size, drawing etc.
-
-## ToDo
-* The main difficulty right now is to improve the environment. The RL algoritms were tested and should be sufficient.
-* Understand and implement Q-Learning.
+When you want to try out trained model, you have to set the LEARN flag in the ai file to false.
+Different models are trained on different observations, so not everything will work. 
+But the models names indicate the settings for the parameters.
 
 ## Disclaimer
 * The environment is constantly being updated, thus saved models often are not usable anymore
+* old_agents probably dont work because the folder structured changed often
+

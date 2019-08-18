@@ -1,29 +1,39 @@
 # Game was made with the help of https://www.youtube.com/watch?v=cXgA1d_E-jY
 import time
 import pygame
-import random
 
 import numpy as np
-import torch
 
 from snake import Snake
 from apple import Apple
 
 # AI PARAMETERS #####################################################################################
-BUFFER_SIZE = 4
-OBSERVATION_SIZE = 5
+BUFFER_SIZE = 2
+OBSERVATION_SIZE = 10*10 
 ACTIONS = [0, 1, 2, 3]
 ACTION_SIZE = 4
 
 # GAME PARAMETERS ###################################################################################
-SCALE = 40
+SCALE = 60
 SCREEN_SIZE = WIDTH, HEIGHT = (600, 600)
+
 BACKGROUND = (72, 72, 72)
 SNAKE_COLOR = (57, 255, 20)
 APPPLE_COLOR = (255, 8, 0)
 FONT = 'dyuthi'
 
-
+""" Rewards
+    1. first apple +1
+    2. every next apple n+1
+    3. hit wall -1
+    4. ate self -2
+"""
+""" Observations
+    1. apple +1
+    3. snake head = 0.5
+    4. every snake body -0.01
+    5. emtpy cell = -1 
+"""
 """
 Interace:
 reset():                resets the whole environment
@@ -35,7 +45,7 @@ get_action_size():      obtain size of action
 """
 
 
-class Environment:
+class SnakeEnvironment:
 
     def __init__(self, draw=True, fps=10, debug=False):
         if draw:
@@ -54,11 +64,8 @@ class Environment:
 
         self.screen = pygame.display.set_mode(SCREEN_SIZE)
 
-        self.snake = Snake(self.screen, WIDTH, HEIGHT, SNAKE_COLOR, SCALE)
+        self.snake = Snake(self.screen, WIDTH, HEIGHT, SNAKE_COLOR, BACKGROUND, SCALE)
         self.apple = Apple(self.screen, WIDTH, HEIGHT, APPPLE_COLOR, SCALE)
-
-        # self.bird = Bird(self.screen, WIDTH, HEIGHT, BIRD_COLOR)
-        # self.pipes = [Pipe(self.screen, WIDTH, HEIGHT, PIPE_COLOR, self.pipe_image, self.pipe_long_image)]
 
         self.reward = 0
         self.is_done = False
@@ -172,9 +179,9 @@ class Environment:
         return ACTION_SIZE
 
     def game_over(self):
-        if not self.printed_score:
-            print('Score: {}'.format(self.reward))
-            self.printed_score = True
+        # if not self.printed_score:
+        #     print('Score: {}'.format(self.reward))
+        #     self.printed_score = True
 
         if self.draw:
             text = pygame.font.SysFont(FONT, 28).render(
@@ -197,22 +204,22 @@ class Environment:
 
             self.global_time += 1
 
-            self.screen.fill(BACKGROUND)
             self.handle_events_human()
-
-            # snake logic
             self.snake.handle_events_human()
-            self.snake.update()
+
             if self.apple.eat(self.snake.x, self.snake.y):
-                print('jjum')
+                self.snake.update(True)
+            else:
+                self.snake.update(False)
 
             if self.draw:
                 self.screen.fill(BACKGROUND)
                 self.snake.draw()
                 self.apple.draw()
-
-            if self.draw:
                 pygame.display.update()
+
+            if self.snake.check_if_dead():
+                self.game_over()
 
             self.time_elapsed_since_last_action = 0
 
@@ -221,7 +228,3 @@ class Environment:
             if event.type == pygame.QUIT:
                 self.is_done = False
                 pygame.quit()
-
-
-env = Environment(True, 80, True)
-env.run_human_game()

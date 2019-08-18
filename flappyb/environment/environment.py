@@ -1,13 +1,11 @@
 # Game was made with the help of https://www.youtube.com/watch?v=cXgA1d_E-jY
 import time
 import pygame
-import random
 
 import numpy as np
-import torch
 
-from flappyb.bird import Bird
-from flappyb.pipe import Pipe
+from environment.bird import Bird
+from environment.pipe import Pipe
 
 # AI PARAMETERS ##########################################################
 BUFFER_SIZE = 4
@@ -22,14 +20,14 @@ BACKGROUND = (146, 183, 254)
 BIRD_COLOR = (241, 213, 19)
 PIPE_COLOR = (44, 176, 26)
 FONT = 'dyuthi'
-# dist_to_pipe = 40  # default is 150, hardcore is 60, HELL is 40
 
 
 """
 Interace:
 reset():                resets the whole environment
 step(action):           performs one action onto the environment
-step_buffer(action):    performs one action onto the environment, returns 4 states for experience replay
+step_buffer(action):    performs one action on the environment,
+                        returns 4 states
 get_action_random():    obtain an imporoved random action
 get_observation_size(): obtain size of observation
 get_action_size():      obtain size of action
@@ -38,7 +36,8 @@ get_action_size():      obtain size of action
 
 class Environment:
 
-    def __init__(self, draw=True, fps=10, debug=False, dist_to_pipe=150, dist_between_pipes=220, obs_this_pipe=True):
+    def __init__(self, draw=True, fps=10, debug=False,
+                 dist_to_pipe=150, dist_between_pipes=220, obs_this_pipe=True):
 
         self.pipe_image_up = None
         self.pipe_image_down = None
@@ -48,12 +47,12 @@ class Environment:
             pygame.display.set_caption('NN FlappyB')
 
             self.font_game_over = pygame.font.SysFont("ani", 72)
-            self.bg = pygame.image.load("flappyb/assets/bg.png")
+            self.bg = pygame.image.load("environment/assets/bg.png")
 
             self.pipe_image_up = pygame.image.load(
-                "flappyb/assets/pipe.png")  # 52x808
+                "environment/assets/pipe.png")  # 52x808
             self.pipe_image_down = pygame.image.load(
-                "flappyb/assets/pipe_long.png")  # 52x808<
+                "environment/assets/pipe_long.png")  # 52x808<
 
         self.dist_between_pipes = dist_between_pipes
 
@@ -71,7 +70,8 @@ class Environment:
 
         self.bird = Bird(self.screen, WIDTH, HEIGHT, BIRD_COLOR)
         self.pipes = [Pipe(self.screen, WIDTH, HEIGHT,
-                           PIPE_COLOR, self.dist_between_pipes, self.pipe_image_up, self.pipe_image_down)]
+                           PIPE_COLOR, self.dist_between_pipes,
+                           self.pipe_image_up, self.pipe_image_down)]
 
         self.reward = 0
         self.is_done = False
@@ -86,7 +86,8 @@ class Environment:
 
         self.bird = Bird(self.screen, WIDTH, HEIGHT, BIRD_COLOR)
         self.pipes = [Pipe(self.screen, WIDTH, HEIGHT,
-                           PIPE_COLOR, self.dist_between_pipes, self.pipe_image_up, self.pipe_image_down)]
+                           PIPE_COLOR, self.dist_between_pipes,
+                           self.pipe_image_up, self.pipe_image_down)]
 
         self.reward = 0
         self.is_done = False
@@ -148,7 +149,8 @@ class Environment:
 
         if self.global_time % self.dist_to_pipe == 0:
             self.pipes.append(Pipe(self.screen, WIDTH, HEIGHT,
-                                   PIPE_COLOR, self.dist_between_pipes, self.pipe_image_up, self.pipe_image_down))
+                                   PIPE_COLOR, self.dist_between_pipes,
+                                   self.pipe_image_up, self.pipe_image_down))
 
         for pipe in self.pipes:
             pipe.update()
@@ -159,7 +161,7 @@ class Environment:
             if pipe.hits(self.bird):
                 self.game_over()
                 current_reward = -1
-                hit_pipe = True
+                # hit_pipe = True
 
             if pipe.behind(self.bird):
                 self.reward += 1

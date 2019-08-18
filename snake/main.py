@@ -1,4 +1,4 @@
-from environment import Environment
+from environment import SnakeEnvironment
 
-env = Environment(True, 80, True)
+env = SnakeEnvironment(draw=True, fps=80, debug=False)
 env.run_human_game()
