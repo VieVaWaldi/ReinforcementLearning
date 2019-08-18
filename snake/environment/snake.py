@@ -35,10 +35,14 @@ class Snake:
             self.move(-1, 0)
 
     def handle_events_ai(self, action):
+        if action == 0:
+            self.move(0, -1)
         if action == 1:
-            pass
-        else:
-            pass
+            self.move(1, 0)
+        if action == 2:
+            self.move(0, 1)
+        if action == 3:
+            self.move(-1, 0)
 
     def draw(self):
 
@@ -65,10 +69,6 @@ class Snake:
                 self.tail[i] = self.tail[i + 1]
             self.tail[length - 1] = Vector(self.x, self.y)
 
-        # for i in self.tail:
-        #     i.x = i.x + self.x_speed * self.scale
-        #     i.y = i.y + self.y_speed * self.scale
-
         self.x = self.x + self.x_speed * self.scale
         self.y = self.y + self.y_speed * self.scale
 
@@ -85,21 +85,18 @@ class Snake:
         self.x_speed = x
         self.y_speed = y
 
-    def check_if_dead(self):
+    def check_if_hit_wall(self):
+        if self.x == 0:
+            return True
+        if self.x == self.s_width - self.scale:
+            return True
+        if self.y == 0:
+            return True
+        if self.y == self.s_height - self.scale:
+            return True
 
-        # if self.x is 0:
-        #     return True
-        # if self.x >= (self.s_width - self.scale):
-        #     return True
-        # if self.y is 0:
-        #     return True
-        # if self.y >= self.s_height - self.scale:
-        #     return True
-
-        print('\nself, ', self.x, self.y)
-        # print('\n')
+    def check_if_ate_self(self):
         for i in self.tail:
-            print('tail, ', i.x, i.y)
             if (self.x == i.x) and (self.y == i.y):
                 return True
 

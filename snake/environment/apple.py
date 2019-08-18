@@ -17,24 +17,43 @@ class Apple:
         self.color = color
         self.scale = scale
 
-        self.place_apple()
+        self.place_apple(None)
 
     def draw(self):
         rect = pygame.rect.Rect(self.x, self.y, self.scale, self.scale)
         pygame.draw.rect(self.screen, self.color, rect)
 
-    def eat(self, snake_x, snake_y):
+    def eat(self, snake_x, snake_y, tail):
         if self.x == snake_x and self.y == snake_y:
-            self.place_apple()
+            self.place_apple(tail)
             return True
         return False
 
-    def place_apple(self):
+    def place_apple(self, tail):
+
         cols = (self.s_width - self.scale) / self.scale
         rows = (self.s_height - self.scale) / self.scale
 
-        rand_x = random.randint(0, cols)
-        rand_y = random.randint(0, rows)
+        rand_x = 0
+        rand_y = 0
+
+        bad_position = True
+
+        if tail is None:
+            bad_position = False
+            rand_x = random.randint(0, cols)
+            rand_y = random.randint(0, rows)
+
+        while bad_position:
+            bad_position = False
+
+            rand_x = random.randint(0, cols)
+            rand_y = random.randint(0, rows)
+
+            for i in tail:
+                if rand_x == i.x and rand_y == i.y:
+                    bad_position = True
+                    break
 
         self.x = rand_x * self.scale
         self.y = rand_y * self.scale
