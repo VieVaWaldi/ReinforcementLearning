@@ -138,10 +138,7 @@ class Environment:
         elif rew < -1:
             rew = -1
         else:
-            rew = 0.1
-
-        print(obs)
-        time.sleep(10)
+            rew = 0.1w
 
         return obs, rew, d, _
 
