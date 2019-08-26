@@ -1,4 +1,4 @@
-# Reinforcment Learning
+# Reinforcement Learning
 
 The algorithms were implemented using the book: "Deep Reinforcement Learning Hands-On" written by Maxim Lapan.
 He provides a github repo with multiple implementations, that can be found in here:
