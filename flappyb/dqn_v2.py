@@ -13,7 +13,7 @@ from keras.models import load_model
 
 from environment.environment import Environment
 
-from tensorboardX import SummaryWriter
+# from tensorboardX import SummaryWriter
 
 GAMMA = 0.9                     # try .99
 LEARNING_RATE = 0.001           # default is 0.001
@@ -27,10 +27,10 @@ EXPLORATION_MIN = 0.01
 EXPLORATION_DECAY = 0.99995
 
 # PARAMETERS ##################################################################
-LEARN = False                   # False if using a trained model
+LEARN = True                   # False if using a trained model
 
 NAME = 'dqn-loadedHARDCORE=6300-grav=2.5-dist-pipes=220-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-nextPipe'
-WRITE = True                    # Only for training
+WRITE = False                    # Only for training
 DRAW = False                    # Only for training
 SAVE_MODEL = True               # Only for training
 
@@ -46,11 +46,6 @@ DIST_BETWEEN_PIPES = 220        # default is 220
 # LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-PART=6650' # 950 is oke # 1050 is oke # 6650 My baby is back <3 # 2600 is pretty good # 6300 is god
 # LOAD_NAME = 'dqn-expdecay=0.999995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-HARDCORE-PART=6300'
 LOAD_NAME = 'dqn-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-LOADED=HARDCORE-6300-lrMax=0.4-nextPipe-HELL-PART=1000' # NEXT_PIPE # 1000 is really good!
-
-# LOAD_NAME = 'dqn-grav=4-dist-pipes=150-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-nextPipe-PART=6900'
-# LOAD_NAME = 'dqn-loadedHELL=1000-grav=4-dist-pipes=150-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-nextPipe-PART=2000'
-# LOAD_NAME = 'dqn-loadedHARDCORE=6300-grav=2-dist-pipes=220-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-nextPipe-PART=2300' # 1000 is funny # 1300 is good # 1600 falls only # 1700 is cool
-# LOAD_NAME = 'dqn-loadedHARDCORE=6300-grav=2.5-dist-pipes=220-expdecay=0.99995-gamma=.9-batchsize=20-nn=512-lr=0.001-normalization-nextPipe-PART=1000'
 #####################################################################################################
 
 

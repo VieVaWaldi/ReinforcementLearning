@@ -140,6 +140,9 @@ class Environment:
         else:
             rew = 0.1
 
+        print(obs)
+        time.sleep(10)
+
         return obs, rew, d, _
 
     # The actual game step ###################################################

@@ -10,13 +10,14 @@ from environment.apple import Apple
 
 # AI PARAMETERS ###############################################################
 BUFFER_SIZE = 2
-OBSERVATION_SIZE = 10 * 10
+OBSERVATION_SIZE = 5 * 5
 ACTIONS = [0, 1, 2, 3]
 ACTION_SIZE = 4
 
 # GAME PARAMETERS #############################################################
 SCALE = 60
-SCREEN_SIZE = WIDTH, HEIGHT = (600, 600)
+SCREEN_SIZE = WIDTH, HEIGHT = (300, 300)    # for 5*5 go 300*300, 60
+                                            # for 10*10 go 600*600, 60
 
 BACKGROUND = (72, 72, 72)
 SNAKE_COLOR = (57, 255, 20)
@@ -73,6 +74,10 @@ class SnakeEnvironment:
         self.reward = 0
         self.score = 0
         self.is_done = False
+        self.steps_without_apple = 0
+
+        # self.current_observation = None
+        # self.last_observation = None
 
     # ML INTERFACE ############################################################
     def reset(self):
@@ -84,6 +89,8 @@ class SnakeEnvironment:
 
         self.reward = 0
         self.is_done = False
+        self.score = 0
+        self.steps_without_apple = 0
 
         self.snake = Snake(self.screen, WIDTH, HEIGHT, SNAKE_COLOR,
                            BACKGROUND, SCALE)
@@ -107,51 +114,6 @@ class SnakeEnvironment:
 
         return self.run_ai_game_step(action)
 
-    # to do, always append last action. Dont leave a step
-    def reset_buffer(self):
-        """ Resets the whole environment. Must be called in the beginning. """
-
-        self.clock = pygame.time.Clock()
-        self.time_elapsed_since_last_action = 0
-        self.global_time = 0
-
-        self.reward = 0
-        self.is_done = False
-
-        obs, reward, is_done, _ = self.step_buffer(0)
-
-        if self.draw:
-            self.countdown()
-
-        return obs
-
-    def step_buffer(self, action):
-        """ Performs one step on the env and returns multiple observation state. """
-
-        obs = []
-        rew = 0
-
-        for i in range(BUFFER_SIZE):
-            while not self.time_elapsed_since_last_action > self.fps:
-                dt = self.clock.tick()
-                self.time_elapsed_since_last_action += dt
-
-            self.global_time += 1
-            o, r, d, _ = self.run_ai_game_step(action)
-            rew += r
-
-            for j in range(len(o)):
-                obs.append(o[j])
-
-        if rew > 1:
-            rew = 1
-        elif rew < -1:
-            rew = -1
-        else:
-            rew = 0.1
-
-        return obs, rew, d, _
-
     # The actual game step ####################################################
     def run_ai_game_step(self, action):
 
@@ -161,11 +123,16 @@ class SnakeEnvironment:
 
         if self.apple.eat(self.snake.x, self.snake.y, self.snake.tail):
             self.snake.update(True)
+            self.steps_without_apple = 0
             self.score += 1
             current_reward = self.score
         else:
             self.snake.update(False)
-            current_reward = 0.1
+            self.steps_without_apple += 1
+            if self.steps_without_apple > 15:
+                current_reward = -1
+            else:
+                current_reward = 0.1
 
         if self.draw:
             self.screen.fill(BACKGROUND)
@@ -178,7 +145,7 @@ class SnakeEnvironment:
             self.game_over()
 
         if self.snake.check_if_ate_self():
-            current_reward = -2
+            current_reward = -1
             self.game_over()
 
         self.time_elapsed_since_last_action = 0
@@ -189,45 +156,58 @@ class SnakeEnvironment:
 
     def get_observation_space(self):
 
-        obs = []
+        new_obs = []
 
         # create 2d matrix
         for i in range(int(WIDTH / SCALE)):
-            obs.append([])
+            new_obs.append([])
             for j in range(int(WIDTH / SCALE)):
-                obs[i].append(-1)
+                new_obs[i].append(-1)
 
         # add apple
         x_apple = int(self.apple.x / SCALE)
         y_apple = int(self.apple.y / SCALE)
-        obs[x_apple][y_apple] = 1
+        new_obs[y_apple][x_apple] = 1
 
         # add snake
         x_snake = int(self.snake.x / SCALE)
         y_snake = int(self.snake.y / SCALE)
-        obs[x_snake][y_snake] = 0.5
+        new_obs[y_snake][x_snake] = 0.5
 
-        num_bodies = 1
         for i in self.snake.tail:
             x_snake = int(i.x / SCALE)
             y_snake = int(i.y / SCALE)
-            obs[x_snake][y_snake] = 0.5 - (0.01 * num_bodies)
-            num_bodies += 1
+            new_obs[y_snake][x_snake] = 0.3
 
         if self.draw and self.debug:
-            for i in obs:
+            for i in new_obs:
                 print(i, '\n')
-
             print('\n')
 
-        obs_list = []
-        for i in obs:
+        current_obs = []
+        for i in new_obs:
             for j in i:
-                obs_list.append(j)
+                current_obs.append(j)
 
-        obs = tuple(obs_list)
+        # if self.last_observation == None:
+        #     self.current_observation = current_obs
 
-        return obs
+        # self.last_observation = self.current_observation
+        # self.current_observation = current_obs
+
+        # return_obs = []
+
+        # print(self.last_observation)
+        # print('\n')
+        # print(self.current_observation)
+
+        # for i in self.last_observation:
+        #     return_obs.append(i)
+
+        # for i in self.current_observation:
+        #     return_obs.append(i)
+
+        return current_obs
 
     def get_observation_size(self):
         return OBSERVATION_SIZE
@@ -300,7 +280,6 @@ class SnakeEnvironment:
             time.sleep(0.3)
 
     def game_over(self):
-
         if self.draw:
             text = pygame.font.SysFont(FONT, 28).render(
                 "Game Over!".format(self.reward), True, (0, 0, 0))

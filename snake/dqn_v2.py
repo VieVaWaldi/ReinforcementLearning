@@ -1,21 +1,31 @@
 import random
 import numpy as np
 from collections import deque
+import os
+
+# FORCE CPU
+os.environ["CUDA_DEVICE_ORDER"] = "PCI_BUS_ID"
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
 
 import keras
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
-from keras.models import load_model
+# from keras.models import load_model
 
 from environment.environment import SnakeEnvironment
 
-from tensorboardX import SummaryWriter
+# from tensorboardX import SummaryWriter
+
+# ToDo:
+# try negative reward for sidestep, after n useless steps
+# make buffer
+# understand why score sometimes is so huge
 
 GAMMA = 0.9                     # try .99
 LEARNING_RATE = 0.001           # default is 0.001
 
-MEMORY_SIZE = 1000000
+MEMORY_SIZE = 800000
 BATCH_SIZE = 20
 
 EXPLORATION_MAX = 1
@@ -23,15 +33,18 @@ EXPLORATION_MIN = 0.01
 EXPLORATION_DECAY = 0.99995
 
 # PARAMETERS ##################################################################
-LEARN = True                   # False if using a trained model
+LEARN = False                    # False if using a trained model
 
-NAME = 'first-attempt'
-WRITE = True                    # Only for training
-DRAW = True                     # Only for training
+NAME = '5*5-new-paras-512-obs'
+WRITE = False                   # Only for training
+DRAW = False                    # Only for training
 SAVE_MODEL = True               # Only for training
 
 # Here you can load trained models:
-LOAD_NAME = 'fist-attempt'
+# LOAD_NAME = '5*5-first-attempt-PART=6000'
+# LOAD_NAME = '5*5-bad-when-no-apple-PART=21800'
+# LOAD_NAME = '5*5-new-paras-i1024o-PART=22000'
+LOAD_NAME = '5*5-new-paras-512-obs-PART=100000'
 ###############################################################################
 
 
@@ -44,21 +57,16 @@ class DQNSolver:
         self.memory = deque(maxlen=MEMORY_SIZE)
 
         if model is None:
-            print('new model')
             self.model = Sequential()
-            # andere aktivierungs funktion
             self.model.add(Dense(512, input_shape=(
                 observation_space,), activation="relu"))
             self.model.add(Dense(512, activation="relu"))
             # self.model.add(Dropout(0.85))
-            # self.model.add(Dense(512, activation="relu"))
-            # Linear sucks? maybe try softmax
             self.model.add(Dense(self.action_space, activation="linear"))
             self.model.compile(loss="mse", optimizer=Adam(
                 lr=LEARNING_RATE))    # Try learning rate deacy
             # self.model.compile(loss="mse", optimizer=Adam(lr=LEARNING_WITH_DECAY, decay=1e-6))
         else:
-            print('saved model loaded')
             self.model = model
 
     def remember(self, state, action, reward, next_state, done):
@@ -91,7 +99,7 @@ class DQNSolver:
 
 
 def learn_snake():
-    env = SnakeEnvironment(draw=DRAW, fps=20, debug=False)
+    env = SnakeEnvironment(draw=DRAW, fps=1, debug=False)
     writer = None
     if WRITE:
         writer = SummaryWriter(comment=NAME)
@@ -131,35 +139,65 @@ def learn_snake():
         if (run % 100 == 0) and SAVE_MODEL:
             name = '{}-PART={}'.format(NAME, run)
             dqn_solver.model.save('models/dqn/{}.h5'.format(name))
+            with open("{}.txt".format(NAME),"a") as f:
+                f.write("#Run {}, Score: {}\n".format(run, reward_score))
     if WRITE:
         writer.close()
 
 
-def play_snake():
-    env = SnakeEnvironment(draw=True, fps=1, debug=True)
+def play_snake(load_name=""):
+    env = SnakeEnvironment(draw=True, fps=40, debug=False)
+
 
     observation_space = env.get_observation_size()
     action_space = env.get_action_size()
 
-    model = keras.models.load_model('models/dqn/{}.h5'.format(LOAD_NAME))
-    dqn_solver = DQNSolver(observation_space, action_space, model)
+    model = None
+    if load_name is not "":
+        model = keras.models.load_model('models/dqn/{}.h5'.format(load_name))
+    else:
+        model = keras.models.load_model('models/dqn/{}.h5'.format(LOAD_NAME))
 
-    for i in range(20):
+    dqn_solver = DQNSolver(observation_space, action_space, model)
+    reward_total = 0
+
+    for i in range(50):
+        reward_total = 0
+
         state = env.reset()
         state = np.reshape(state, [1, observation_space])
         is_done = False
+        
+        step = 0
         while not is_done:
+            step += 1
             action = dqn_solver.act_free(state)
-            # action = env.get_action_random()
             state_next, reward, terminal, info = env.step(action)
+            reward_total += reward
             is_done = terminal
             state = np.reshape(state_next, [1, observation_space])
-
+            if step == 100:
+                is_done = True
+        print(reward_total)
+    return reward_total
 
 if __name__ == "__main__":
     if LEARN:
         learn_snake()
     else:
         play_snake()
+        # top_rew = -10.0
+        # top_ep = 0
+
+        # for i in range(1500, 21100, 100):
+        #     print('# run ', i)
+        #     rew = play_snake(load_name='5*5-bad-when-no-apple-PART={}'.format(i))
+        #     if rew > top_rew:
+        #         top_rew = rew
+        #         top_ep = i
+        #     print('top rew: ', top_rew, ' #', top_ep)
+
+        # print('\n****\n\nFinally: top reward, ', top_rew)
+        # print('top episode, ', top_ep)
 
     print('Jobe Done!')

@@ -15,8 +15,8 @@ class Snake:
 
         self.scale = scale
 
-        self.x = 5 * scale
-        self.y = 5 * scale
+        self.x = 2 * scale
+        self.y = 2 * scale
 
         self.x_speed = 1
         self.y_speed = 0
