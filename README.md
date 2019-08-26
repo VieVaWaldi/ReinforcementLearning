@@ -12,8 +12,8 @@ The root folder consits of:
 3. runTensorBoard {dir}, runs tensorboard on a choosen directory
 4. old_agents, implementations of weaker RL algorithms
 
-When you want to try out trained model, you have to set the LEARN flag in the ai file to false.
-Different models are trained on different observations, so not everything combination will work. 
+When you want to try out trained model, you have to set the LEARN flag in the agent file to false.
+Different models are trained on different observations, so not every combination will work. 
 But the models name indicates the settings for the parameters.
 
 ## Current Algorithms
@@ -27,6 +27,7 @@ But the models name indicates the settings for the parameters.
 * All variants of dqn up until rainbow dqn.
 * AC2 and AC3
 * PPO2 
+* more gamessss
 
 ## Disclaimer
 * The environment is constantly being updated, thus saved models often are not usable anymore
