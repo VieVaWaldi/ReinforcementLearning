@@ -79,13 +79,13 @@ class Agent:
             action = env.get_action_random()
         else:
             state_a = np.array([self.state], copy=False)
-            state_v = torch.tensor(state_a).to(device)
+            state_v = torch.tensor(state_a[0]).to(device)
             q_vals_v = net(state_v.float())
             _, act_v = torch.max(q_vals_v, dim=1)
             action = int(act_v.item())
 
         # do step in the environment
-        new_state, reward, is_done, _ = self.env.step(action)
+        new_state, reward, is_done, _ = self.env.step_buffer(action)
         self.total_reward += reward
 
         exp = Experience(self.state, action, reward, is_done, new_state)
@@ -120,7 +120,7 @@ def calc_loss(batch, net, tgt_net, device="cpu"):
 if __name__ == "__main__":
     device = torch.device("cuda" if GPU else "cpu")
 
-    env = Environment(draw=True, fps=1, debug=False,
+    env = Environment(draw=False, fps=1, debug=False,
                       dist_to_pipe=50, dist_between_pipes=180,
                       obs_this_pipe=False)
 

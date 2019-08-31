@@ -138,7 +138,7 @@ class Environment:
         elif rew < -1:
             rew = -1
         else:
-            rew = 0.1w
+            rew = 0.1
 
         return obs, rew, d, _
 
@@ -268,7 +268,7 @@ class Environment:
 
     def game_over(self):
         if not self.printed_score:
-            print('Score: {}'.format(self.reward))
+            # print('Score: {}'.format(self.reward))
             self.printed_score = True
 
         if self.draw:

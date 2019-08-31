@@ -20,7 +20,7 @@ class Bird():
         self.y = int(s_height / 2)
 
         self.vel = 0
-        self.gravity = 2.5  # default is 1
+        self.gravity = 2  # default is 1
 
         self.bottom = s_height - 20
         self.vel_cap = 20
