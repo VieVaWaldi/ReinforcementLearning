@@ -1,6 +1,8 @@
 # Game was made with the help of https://www.youtube.com/watch?v=cXgA1d_E-jY
 import time
 import pygame
+import gym
+import enum
 
 import numpy as np
 
@@ -34,10 +36,19 @@ get_action_size():      obtain size of action
 """
 
 
-class Environment:
+class Actions(enum.Enum):
+    Skip = 0
+    Fly = 1
+
+
+class Environment(gym.Env):
 
     def __init__(self, draw=True, fps=10, debug=False,
                  dist_to_pipe=150, dist_between_pipes=220, obs_this_pipe=True):
+
+        super(Environment, self).__init__()
+        self.observation_space = gym.spaces.Discrete(n=OBSERVATION_SIZE * BUFFER_SIZE)
+        self.action_space = gym.spaces.Discrete(n=len(Actions))
 
         self.pipe_image_up = None
         self.pipe_image_down = None
@@ -93,30 +104,30 @@ class Environment:
         self.is_done = False
         self.printed_score = False
 
-        obs, reward, is_done, _ = self.step_buffer(0)
+        obs, reward, is_done, _ = self.step(0)
 
         return obs
 
+    # def step(self, action):
+
+    #     while not self.time_elapsed_since_last_action > self.fps:
+    #         dt = self.clock.tick()
+    #         self.time_elapsed_since_last_action += dt
+
+    #     self.global_time += 1
+
+    #     obs, rew, d, _ = self.run_ai_game_step(action)
+
+    #     if rew >= 1:
+    #         rew = 0.25
+    #     elif rew <= -1:
+    #         rew = -0.25
+    #     else:
+    #         rew = 0.025
+
+    #     return obs, rew, d, _
+
     def step(self, action):
-
-        while not self.time_elapsed_since_last_action > self.fps:
-            dt = self.clock.tick()
-            self.time_elapsed_since_last_action += dt
-
-        self.global_time += 1
-
-        obs, rew, d, _ = self.run_ai_game_step(action)
-
-        if rew >= 1:
-            rew = 0.25
-        elif rew <= -1:
-            rew = -0.25
-        else:
-            rew = 0.025
-
-        return obs, rew, d, _
-
-    def step_buffer(self, action):
 
         obs = []
         rew = 0
@@ -139,6 +150,8 @@ class Environment:
             rew = -1
         else:
             rew = 0.1
+
+        obs = np.array(obs)
 
         return obs, rew, d, _
 
