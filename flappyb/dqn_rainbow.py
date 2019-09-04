@@ -117,7 +117,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
 
-    env = Environment(draw=True, fps=1, debug=False,
+    env = Environment(draw=False, fps=1, debug=False,
                       dist_to_pipe=50, dist_between_pipes=180, obs_this_pipe=True)
 
     writer = SummaryWriter(comment="-" + params['run_name'] + "-rainbow")
