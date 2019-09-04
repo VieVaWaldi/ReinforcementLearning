@@ -245,3 +245,4 @@ GitHub.sublime-settings
 # Custom
 .runs/**
 .idea/**
+runs/
