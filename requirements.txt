@@ -13,4 +13,4 @@ pybullet==2.3.6
 matplotlib==3.0.2
 pygame
 
-Some things are missing
+Some things are missing, sorry
