@@ -2,14 +2,16 @@
 import time
 import pygame
 import random
+import enum
 
 import numpy as np
+import gym
 
 from environment.snake import Snake
 from environment.apple import Apple
 
 # AI PARAMETERS ###############################################################
-BUFFER_SIZE = 2
+BUFFER_SIZE = 1
 OBSERVATION_SIZE = 5 * 5
 ACTIONS = [0, 1, 2, 3]
 ACTION_SIZE = 4
@@ -49,9 +51,21 @@ get_action_size():      obtain size of action
 """
 
 
-class SnakeEnvironment:
+class Actions(enum.Enum):
+    Up = 0
+    Right = 1
+    Down = 2
+    Left = 3
+
+
+class SnakeEnvironment(gym.Env):
 
     def __init__(self, draw=True, fps=10, debug=False):
+
+        super(SnakeEnvironment, self).__init__()
+        self.observation_space = gym.spaces.Discrete(n=OBSERVATION_SIZE * BUFFER_SIZE)
+        self.action_space = gym.spaces.Discrete(n=len(Actions))
+
         if draw:
             pygame.init()
             pygame.display.set_caption('NN Snake')
@@ -207,16 +221,9 @@ class SnakeEnvironment:
         # for i in self.current_observation:
         #     return_obs.append(i)
 
+        current_obs = np.array(current_obs)
+
         return current_obs
-
-    def get_observation_size(self):
-        return OBSERVATION_SIZE
-
-    def get_observation_size_buffer(self):
-        return OBSERVATION_SIZE * BUFFER_SIZE
-
-    def get_action_size(self):
-        return ACTION_SIZE
 
     def get_action_random(self):
         return random.randint(0, 3)
@@ -277,7 +284,7 @@ class SnakeEnvironment:
                              (text_start.get_width() //
                               2, text_start.get_height() // 2))
             pygame.display.flip()
-            time.sleep(0.3)
+            # time.sleep(0.3)
 
     def game_over(self):
         if self.draw:
@@ -286,5 +293,5 @@ class SnakeEnvironment:
             self.screen.blit(text, (320 - text.get_width() //
                                     2, 240 - text.get_height() // 2))
             pygame.display.flip()
-            time.sleep(0.4)
+            # time.sleep(0.4)
         self.is_done = True

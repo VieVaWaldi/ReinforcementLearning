@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 from environment.environment import Environment
 import ptan
 import argparse

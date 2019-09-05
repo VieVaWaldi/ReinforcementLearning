@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from environment.environment import Environment
+from environment.environment import SnakeEnvironment
 import ptan
 import argparse
 import numpy as np
@@ -110,15 +110,14 @@ def calc_loss(batch, batch_weights, net, tgt_net, gamma, device="cpu"):
 
 
 if __name__ == "__main__":
-    params = common.HYPERPARAMS['flappyb']
+    params = common.HYPERPARAMS['snake']
     params['epsilon_frames'] *= 2
     parser = argparse.ArgumentParser()
     parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
 
-    env = Environment(draw=False, fps=1, debug=False,
-                      dist_to_pipe=50, dist_between_pipes=180, obs_this_pipe=True)
+    env = SnakeEnvironment(draw=True, fps=1, debug=False)
 
     writer = SummaryWriter(comment="-" + params['run_name'] + "-rainbow")
     net = RainbowDQN(env.observation_space.n, env.action_space.n).to(device)
