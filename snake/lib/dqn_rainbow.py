@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from environment.environment import SnakeEnvironment
+from environment.environment import Environment
 import ptan
 import argparse
 import numpy as np
@@ -12,14 +12,14 @@ import torch.optim as optim
 
 from tensorboardX import SummaryWriter
 
-from lib import dqn_model
-from lib import common
+import dqn as dqn_model
+import common
 
 # n-step
-REWARD_STEPS = 1
+REWARD_STEPS = 2
 
 # priority replay
-PRIO_REPLAY_ALPHA = 0.8
+PRIO_REPLAY_ALPHA = 0.6
 BETA_START = 0.4
 BETA_FRAMES = 100000
 
@@ -35,13 +35,13 @@ class RainbowDQN(nn.Module):
         super(RainbowDQN, self).__init__()
 
         self.fc_val = nn.Sequential(
-            dqn_model.NoisyLinear(input_shape, 256),
+            dqn_model.NoisyLinear(input_shape[0], 256),
             nn.ReLU(),
             dqn_model.NoisyLinear(256, N_ATOMS)
         )
 
         self.fc_adv = nn.Sequential(
-            dqn_model.NoisyLinear(input_shape, 256),
+            dqn_model.NoisyLinear(input_shape[0], 256),
             nn.ReLU(),
             dqn_model.NoisyLinear(256, n_actions * N_ATOMS)
         )
@@ -110,19 +110,18 @@ def calc_loss(batch, batch_weights, net, tgt_net, gamma, device="cpu"):
 
 
 if __name__ == "__main__":
-    params = common.HYPERPARAMS['snake']
+    params = common.HYPERPARAMS['pong']
     params['epsilon_frames'] *= 2
     parser = argparse.ArgumentParser()
     parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
 
-    env = SnakeEnvironment(draw=True, fps=1, debug=False)
+    env = gym.make(params['env_name'])
+    env = ptan.common.wrappers.wrap_dqn(env)
 
     writer = SummaryWriter(comment="-" + params['run_name'] + "-rainbow")
-    writer = None
-
-    net = RainbowDQN(env.observation_space.n, env.action_space.n).to(device)
+    net = RainbowDQN(env.observation_space.shape, env.action_space.n).to(device)
     tgt_net = ptan.agent.TargetNet(net)
     agent = ptan.agent.DQNAgent(lambda x: net.qvals(x), ptan.actions.ArgmaxActionSelector(), device=device)
 
@@ -133,7 +132,7 @@ if __name__ == "__main__":
     frame_idx = 0
     beta = BETA_START
 
-    with common.RewardTracker(net, writer, params['stop_reward']) as reward_tracker:
+    with common.RewardTracker(writer, params['stop_reward']) as reward_tracker:
         while True:
             frame_idx += 1
             buffer.populate(1)

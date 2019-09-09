@@ -90,8 +90,8 @@ class SnakeEnvironment(gym.Env):
         self.is_done = False
         self.steps_without_apple = 0
 
-        # self.current_observation = None
-        # self.last_observation = None
+        self.current_observation = None
+        self.last_observation = None
 
     # ML INTERFACE ############################################################
     def reset(self):
@@ -191,7 +191,7 @@ class SnakeEnvironment(gym.Env):
         for i in self.snake.tail:
             x_snake = int(i.x / SCALE)
             y_snake = int(i.y / SCALE)
-            new_obs[y_snake][x_snake] = 0.3
+            new_obs[y_snake][x_snake] = 0.5
 
         if self.draw and self.debug:
             for i in new_obs:
@@ -203,25 +203,32 @@ class SnakeEnvironment(gym.Env):
             for j in i:
                 current_obs.append(j)
 
-        # if self.last_observation == None:
-        #     self.current_observation = current_obs
+        if self.last_observation == None:
+            self.current_observation = current_obs
 
-        # self.last_observation = self.current_observation
-        # self.current_observation = current_obs
+        self.last_observation = self.current_observation
+        self.current_observation = current_obs
 
-        # return_obs = []
+        return_obs = []
 
-        # print(self.last_observation)
-        # print('\n')
-        # print(self.current_observation)
+        for i in self.last_observation:
+            return_obs.append(i)
 
-        # for i in self.last_observation:
-        #     return_obs.append(i)
-
-        # for i in self.current_observation:
-        #     return_obs.append(i)
+        for i in self.current_observation:
+            return_obs.append(i)
 
         current_obs = np.array(current_obs)
+
+        # for i in range(25):
+        #     if i%5==0:
+        #         print('')
+        #     print(' ' , self.last_observation[i] , ' ' , end='')
+
+        # print('')
+        # for i in range(25):
+        #     if i%5==0:
+        #         print('')
+        #     print(' ' ,self.current_observation[i], ' ' , end='')
 
         return current_obs
 
