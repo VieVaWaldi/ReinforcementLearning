@@ -14,6 +14,12 @@ from tensorboardX import SummaryWriter
 from lib import dqn_model
 from lib import common
 
+
+MODEL_NAME = "flappyb-test-the-rainbow"
+NUMBER_NEURONS = 512
+WRITE = True
+
+
 # n-step
 REWARD_STEPS = 2
 
@@ -34,15 +40,15 @@ class RainbowDQN(nn.Module):
         super(RainbowDQN, self).__init__()
 
         self.fc_val = nn.Sequential(
-            dqn_model.NoisyLinear(input_shape, 256),
+            dqn_model.NoisyLinear(input_shape, NUMBER_NEURONS),
             nn.ReLU(),
-            dqn_model.NoisyLinear(256, N_ATOMS)
+            dqn_model.NoisyLinear(NUMBER_NEURONS, N_ATOMS)
         )
 
         self.fc_adv = nn.Sequential(
-            dqn_model.NoisyLinear(input_shape, 256),
+            dqn_model.NoisyLinear(input_shape, NUMBER_NEURONS),
             nn.ReLU(),
-            dqn_model.NoisyLinear(256, n_actions * N_ATOMS)
+            dqn_model.NoisyLinear(NUMBER_NEURONS, n_actions * N_ATOMS)
         )
 
         self.register_buffer("supports", torch.arange(Vmin, Vmax+DELTA_Z, DELTA_Z))
@@ -50,7 +56,7 @@ class RainbowDQN(nn.Module):
 
     def forward(self, x):
         batch_size = x.size()[0]
-        fx = x.float() / 256
+        fx = x.float() / NUMBER_NEURONS
         val_out = self.fc_val(fx).view(batch_size, 1, N_ATOMS)
         adv_out = self.fc_adv(fx).view(batch_size, -1, N_ATOMS)
         adv_mean = adv_out.mean(dim=1, keepdim=True)
@@ -118,8 +124,9 @@ if __name__ == "__main__":
 
     env = Environment(draw=False, fps=1, debug=False,
                       dist_to_pipe=50, dist_between_pipes=180, obs_this_pipe=True)
-
-    writer = SummaryWriter(comment="-" + params['run_name'] + "-rainbow")
+    writer = None
+    if WRITE:
+        writer = SummaryWriter(comment="-" + params['run_name'] + "-rainbow")
     net = RainbowDQN(env.observation_space.n, env.action_space.n).to(device)
     tgt_net = ptan.agent.TargetNet(net)
     agent = ptan.agent.DQNAgent(lambda x: net.qvals(x), ptan.actions.ArgmaxActionSelector(), device=device)
@@ -131,7 +138,7 @@ if __name__ == "__main__":
     frame_idx = 0
     beta = BETA_START
 
-    with common.RewardTracker(writer, params['stop_reward']) as reward_tracker:
+    with common.RewardTracker(MODEL_NAME, net, writer, params['stop_reward']) as reward_tracker:
         while True:
             frame_idx += 1
             buffer.populate(1)

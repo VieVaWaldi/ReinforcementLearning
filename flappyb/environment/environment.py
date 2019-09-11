@@ -2,6 +2,7 @@
 import time
 import pygame
 import gym
+import gym.spaces
 import enum
 
 import numpy as np

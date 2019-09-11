@@ -9,58 +9,16 @@ HYPERPARAMS = {
     'snake': {
         'stop_reward':      40.0,
         'run_name':         'snake',
-        'replay_size':      1000000,
+        'replay_size':      100000,
         'replay_initial':   100000,
-        'target_net_sync':  2500,
+        'target_net_sync':  1000,
         'epsilon_frames':   10**5.4,
         'epsilon_start':    1.0,
         'epsilon_final':    0.02,
         'learning_rate':    0.001,
         'gamma':            0.99,
         'batch_size':       20
-    },
-    'breakout-small': {
-        'env_name':         "BreakoutNoFrameskip-v4",
-        'stop_reward':      500.0,
-        'run_name':         'breakout-small',
-        'replay_size':      3*10 ** 5,
-        'replay_initial':   20000,
-        'target_net_sync':  1000,
-        'epsilon_frames':   10 ** 6,
-        'epsilon_start':    1.0,
-        'epsilon_final':    0.1,
-        'learning_rate':    0.0001,
-        'gamma':            0.99,
-        'batch_size':       64
-    },
-    'breakout': {
-        'env_name':         "BreakoutNoFrameskip-v4",
-        'stop_reward':      500.0,
-        'run_name':         'breakout',
-        'replay_size':      10 ** 6,
-        'replay_initial':   50000,
-        'target_net_sync':  10000,
-        'epsilon_frames':   10 ** 6,
-        'epsilon_start':    1.0,
-        'epsilon_final':    0.1,
-        'learning_rate':    0.00025,
-        'gamma':            0.99,
-        'batch_size':       32
-    },
-    'invaders': {
-        'env_name': "SpaceInvadersNoFrameskip-v4",
-        'stop_reward': 500.0,
-        'run_name': 'breakout',
-        'replay_size': 10 ** 6,
-        'replay_initial': 50000,
-        'target_net_sync': 10000,
-        'epsilon_frames': 10 ** 6,
-        'epsilon_start': 1.0,
-        'epsilon_final': 0.1,
-        'learning_rate': 0.00025,
-        'gamma': 0.99,
-        'batch_size': 32
-    },
+    }
 }
 
 
@@ -133,8 +91,8 @@ class RewardTracker:
             self.writer.add_scalar("reward", reward, frame)
         if reward > self.best_reward:
             self.best_reward = reward
-            torch.save(self.net.state_dict(), 'models/best-snake-model')
-            print("Solved in %d frames!" % frame)
+            torch.save(self.net.state_dict(), 'models/best-snake-model-' + str(reward))
+            print("\tNew best reward = ", str(reward))
         if mean_reward > self.stop_reward:
             print("Solved in %d frames!" % frame)
             return True

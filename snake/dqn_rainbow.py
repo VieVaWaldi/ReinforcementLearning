@@ -16,10 +16,10 @@ from lib import dqn_model
 from lib import common
 
 # n-step
-REWARD_STEPS = 1
+REWARD_STEPS = 2
 
 # priority replay
-PRIO_REPLAY_ALPHA = 0.8
+PRIO_REPLAY_ALPHA = 0.6
 BETA_START = 0.4
 BETA_FRAMES = 100000
 
@@ -35,15 +35,15 @@ class RainbowDQN(nn.Module):
         super(RainbowDQN, self).__init__()
 
         self.fc_val = nn.Sequential(
-            dqn_model.NoisyLinear(input_shape, 612),
+            dqn_model.NoisyLinear(input_shape, 1024),
             nn.ReLU(),
-            dqn_model.NoisyLinear(612, N_ATOMS)
+            dqn_model.NoisyLinear(1024, N_ATOMS)
         )
 
         self.fc_adv = nn.Sequential(
-            dqn_model.NoisyLinear(input_shape, 612),
+            dqn_model.NoisyLinear(input_shape, 1024),
             nn.ReLU(),
-            dqn_model.NoisyLinear(612, n_actions * N_ATOMS)
+            dqn_model.NoisyLinear(1024, n_actions * N_ATOMS)
         )
 
         self.register_buffer("supports", torch.arange(Vmin, Vmax+DELTA_Z, DELTA_Z))
@@ -51,7 +51,7 @@ class RainbowDQN(nn.Module):
 
     def forward(self, x):
         batch_size = x.size()[0]
-        fx = x.float() / 612
+        fx = x.float() / 1024
         val_out = self.fc_val(fx).view(batch_size, 1, N_ATOMS)
         adv_out = self.fc_adv(fx).view(batch_size, -1, N_ATOMS)
         adv_mean = adv_out.mean(dim=1, keepdim=True)
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     device = torch.device("cuda" if args.cuda else "cpu")
 
-    env = SnakeEnvironment(draw=True, fps=1, debug=False)
+    env = SnakeEnvironment(draw=False, fps=1, debug=False)
 
     writer = SummaryWriter(comment="-" + params['run_name'] + "-rainbow")
     writer = None

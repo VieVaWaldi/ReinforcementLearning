@@ -7,7 +7,7 @@ import torch.nn as nn
 
 HYPERPARAMS = {
     'flappyb': {
-        'stop_reward':      50.0,
+        'stop_reward':      250.0,
         'run_name':         'flappyb',
         'replay_size':      100000,
         'replay_initial':   10000,
@@ -18,49 +18,7 @@ HYPERPARAMS = {
         'learning_rate':    0.001,
         'gamma':            0.9,
         'batch_size':       32
-    },
-    'breakout-small': {
-        'env_name':         "BreakoutNoFrameskip-v4",
-        'stop_reward':      500.0,
-        'run_name':         'breakout-small',
-        'replay_size':      3*10 ** 5,
-        'replay_initial':   20000,
-        'target_net_sync':  1000,
-        'epsilon_frames':   10 ** 6,
-        'epsilon_start':    1.0,
-        'epsilon_final':    0.1,
-        'learning_rate':    0.0001,
-        'gamma':            0.99,
-        'batch_size':       64
-    },
-    'breakout': {
-        'env_name':         "BreakoutNoFrameskip-v4",
-        'stop_reward':      500.0,
-        'run_name':         'breakout',
-        'replay_size':      10 ** 6,
-        'replay_initial':   50000,
-        'target_net_sync':  10000,
-        'epsilon_frames':   10 ** 6,
-        'epsilon_start':    1.0,
-        'epsilon_final':    0.1,
-        'learning_rate':    0.00025,
-        'gamma':            0.99,
-        'batch_size':       32
-    },
-    'invaders': {
-        'env_name': "SpaceInvadersNoFrameskip-v4",
-        'stop_reward': 500.0,
-        'run_name': 'breakout',
-        'replay_size': 10 ** 6,
-        'replay_initial': 50000,
-        'target_net_sync': 10000,
-        'epsilon_frames': 10 ** 6,
-        'epsilon_start': 1.0,
-        'epsilon_final': 0.1,
-        'learning_rate': 0.00025,
-        'gamma': 0.99,
-        'batch_size': 32
-    },
+    }
 }
 
 
@@ -98,9 +56,12 @@ def calc_loss_dqn(batch, net, tgt_net, gamma, device="cpu"):
 
 
 class RewardTracker:
-    def __init__(self, writer, stop_reward):
+    def __init__(self, name, net, writer, stop_reward):
         self.writer = writer
         self.stop_reward = stop_reward
+        self.net = net
+        self.name = name
+        self.best_reward = -1
 
     def __enter__(self):
         self.ts = time.time()
@@ -109,7 +70,8 @@ class RewardTracker:
         return self
 
     def __exit__(self, *args):
-        self.writer.close()
+        if self.writer != None:
+            self.writer.close()
 
     def reward(self, reward, frame, epsilon=None):
         self.total_rewards.append(reward)
@@ -122,11 +84,16 @@ class RewardTracker:
             frame, len(self.total_rewards), mean_reward, speed, epsilon_str
         ))
         sys.stdout.flush()
-        if epsilon is not None:
-            self.writer.add_scalar("epsilon", epsilon, frame)
-        self.writer.add_scalar("speed", speed, frame)
-        self.writer.add_scalar("reward_100", mean_reward, frame)
-        self.writer.add_scalar("reward", reward, frame)
+        if self.writer != None:
+            if epsilon is not None:
+                self.writer.add_scalar("epsilon", epsilon, frame)
+            self.writer.add_scalar("speed", speed, frame)
+            self.writer.add_scalar("reward_100", mean_reward, frame)
+            self.writer.add_scalar("reward", reward, frame)
+        if reward > self.best_reward:
+            self.best_reward = reward
+            torch.save(self.net.state_dict(), 'models/' + self.name + str(reward))
+            print("\tNew best reward = ", str(reward))
         if mean_reward > self.stop_reward:
             print("Solved in %d frames!" % frame)
             return True

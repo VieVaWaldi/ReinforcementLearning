@@ -1,11 +1,12 @@
 # Game was made with the help of https://www.youtube.com/watch?v=cXgA1d_E-jY
+import gym
+import gym.spaces
 import time
 import pygame
 import random
 import enum
 
 import numpy as np
-import gym
 
 from environment.snake import Snake
 from environment.apple import Apple
