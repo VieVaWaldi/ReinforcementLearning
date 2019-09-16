@@ -17,8 +17,7 @@ from lib import common
 
 MODEL_NAME = "flappyb-test-the-rainbow"
 NUMBER_NEURONS = 512
-WRITE = True
-
+WRITE = False
 
 # n-step
 REWARD_STEPS = 2

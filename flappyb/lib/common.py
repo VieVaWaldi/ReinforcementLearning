@@ -7,7 +7,7 @@ import torch.nn as nn
 
 HYPERPARAMS = {
     'flappyb': {
-        'stop_reward':      250.0,
+        'stop_reward':      100.0,
         'run_name':         'flappyb',
         'replay_size':      100000,
         'replay_initial':   10000,
@@ -88,7 +88,7 @@ class RewardTracker:
             if epsilon is not None:
                 self.writer.add_scalar("epsilon", epsilon, frame)
             self.writer.add_scalar("speed", speed, frame)
-            self.writer.add_scalar("reward_100", mean_reward, frame)
+            # self.writer.add_scalar("reward_100", mean_reward, frame)
             self.writer.add_scalar("reward", reward, frame)
         if reward > self.best_reward:
             self.best_reward = reward

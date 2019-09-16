@@ -5,14 +5,14 @@ import numpy as np
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
 
 import collections
 
+import ptan
 from lib import dqn_model
 
 
-MODEL_NAME = "best-snake-model-0.7"
+MODEL_NAME = "flappyb-test-the-rainbow350"
 Vmax = 10
 Vmin = -10
 N_ATOMS = 51
@@ -65,8 +65,11 @@ if __name__ == "__main__":
 
     env = Environment(draw=True, fps=1, debug=True,
                       dist_to_pipe=50, dist_between_pipes=180, obs_this_pipe=True)
+
     net = RainbowDQN(env.observation_space.n, env.action_space.n)
-    net.load_state_dict(torch.load("models/" + MODEL_NAME, map_location=lambda storage, loc: storage))
+    net.load_state_dict(torch.load("models/" + MODEL_NAME, map_location=lambda storage, loc: storage))    
+
+    agent = ptan.agent.DQNAgent(lambda x: net.qvals(x), ptan.actions.ArgmaxActionSelector())
 
     for i in range(10):
         state = env.reset()
@@ -76,8 +79,13 @@ if __name__ == "__main__":
         while True:
             start_ts = time.time()
             state_v = torch.tensor(np.array([state], copy=False))
-            q_vals = net(state_v).data.numpy()[0]
-            action = np.argmax(q_vals)
+            q_vals = agent(state_v) #.data.numpy()[0]
+            action = q_vals[0][0]
+            print(action)
+            # action = np.argmax(q_vals)
+            # print(action)
+            # action = 1 if action > 78 else 0
+            
             c[action] += 1
             state, reward, done, _ = env.step(action)
             total_reward += reward
