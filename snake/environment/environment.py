@@ -64,7 +64,7 @@ class SnakeEnvironment(gym.Env):
     def __init__(self, draw=True, fps=10, debug=False):
 
         super(SnakeEnvironment, self).__init__()
-        self.observation_space = gym.spaces.Discrete(n=OBSERVATION_SIZE * BUFFER_SIZE)
+        self.observation_space = gym.spaces.Discrete(n=OBSERVATION_SIZE)
         self.action_space = gym.spaces.Discrete(n=len(Actions))
 
         if draw:
@@ -132,6 +132,17 @@ class SnakeEnvironment(gym.Env):
     # The actual game step ####################################################
     def run_ai_game_step(self, action):
 
+        idx = -1
+        highest_idx = 0
+        highest_val = -1
+        if isinstance(action, np.ndarray):
+            for i in action:
+                idx += 1
+                if i > highest_val:
+                    highest_idx = idx
+                    highest_val = i
+            action = highest_idx
+
         current_reward = 0.1
 
         self.snake.handle_events_ai(action)
@@ -140,14 +151,17 @@ class SnakeEnvironment(gym.Env):
             self.snake.update(True)
             self.steps_without_apple = 0
             self.score += 1
-            current_reward = self.score
+            if self.score == 10:
+                current_reward = 1
+            else:
+                current_reward = self.score / 10
         else:
             self.snake.update(False)
             self.steps_without_apple += 1
-            if self.steps_without_apple > 15:
+            if self.steps_without_apple > 150:
                 current_reward = -1
             else:
-                current_reward = 0.1
+                current_reward = 0
 
         if self.draw:
             self.screen.fill(BACKGROUND)
@@ -204,21 +218,23 @@ class SnakeEnvironment(gym.Env):
             for j in i:
                 current_obs.append(j)
 
-        if self.last_observation == None:
-            self.current_observation = current_obs
-
-        self.last_observation = self.current_observation
-        self.current_observation = current_obs
-
-        return_obs = []
-
-        for i in self.last_observation:
-            return_obs.append(i)
-
-        for i in self.current_observation:
-            return_obs.append(i)
-
         current_obs = np.array(current_obs)
+
+        # if self.last_observation == None:
+        #     self.current_observation = current_obs
+
+        # self.last_observation = self.current_observation
+        # self.current_observation = current_obs
+
+        # return_obs = []
+
+        # for i in self.last_observation:
+        #     return_obs.append(i)
+
+        # for i in self.current_observation:
+        #     return_obs.append(i)
+
+        # current_obs = np.array(current_obs)
 
         # for i in range(25):
         #     if i%5==0:

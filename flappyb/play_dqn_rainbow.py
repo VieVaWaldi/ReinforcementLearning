@@ -82,9 +82,6 @@ if __name__ == "__main__":
             q_vals = agent(state_v) #.data.numpy()[0]
             action = q_vals[0][0]
             print(action)
-            # action = np.argmax(q_vals)
-            # print(action)
-            # action = 1 if action > 78 else 0
             
             c[action] += 1
             state, reward, done, _ = env.step(action)

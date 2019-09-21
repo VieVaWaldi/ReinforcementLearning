@@ -9,15 +9,15 @@ HYPERPARAMS = {
     'snake': {
         'stop_reward':      40.0,
         'run_name':         'snake',
-        'replay_size':      100000,
+        'replay_size':      1000000,
         'replay_initial':   100000,
         'target_net_sync':  1000,
-        'epsilon_frames':   10**5.4,
+        'epsilon_frames':   10**6,
         'epsilon_start':    1.0,
         'epsilon_final':    0.02,
-        'learning_rate':    0.001,
-        'gamma':            0.99,
-        'batch_size':       20
+        'learning_rate':    0.002,
+        'gamma':            0.9,
+        'batch_size':       32
     }
 }
 
@@ -91,7 +91,7 @@ class RewardTracker:
             self.writer.add_scalar("reward", reward, frame)
         if reward > self.best_reward:
             self.best_reward = reward
-            torch.save(self.net.state_dict(), 'models/best-snake-model-' + str(reward))
+            torch.save(self.net.state_dict(), 'models/best-snake-model-' + str(int(reward)))
             print("\tNew best reward = ", str(reward))
         if mean_reward > self.stop_reward:
             print("Solved in %d frames!" % frame)

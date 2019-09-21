@@ -15,7 +15,12 @@ from tensorboardX import SummaryWriter
 from lib import dqn_model
 from lib import common
 
+# score ate apple always one. No, shaping from 0,1 to 1!
+# steps without apple can be 50 (150?) or even higher, idk, might help movement
+# doing nothing grants 0.1
+
 # n-step
+
 REWARD_STEPS = 2
 
 # priority replay
@@ -29,21 +34,23 @@ Vmin = -10
 N_ATOMS = 51
 DELTA_Z = (Vmax - Vmin) / (N_ATOMS - 1)
 
+NEURONS_IN = 1024
+
 
 class RainbowDQN(nn.Module):
     def __init__(self, input_shape, n_actions):
         super(RainbowDQN, self).__init__()
 
         self.fc_val = nn.Sequential(
-            dqn_model.NoisyLinear(input_shape, 1024),
+            dqn_model.NoisyLinear(input_shape, NEURONS_IN),
             nn.ReLU(),
-            dqn_model.NoisyLinear(1024, N_ATOMS)
+            dqn_model.NoisyLinear(NEURONS_IN, N_ATOMS)
         )
 
         self.fc_adv = nn.Sequential(
-            dqn_model.NoisyLinear(input_shape, 1024),
+            dqn_model.NoisyLinear(input_shape, NEURONS_IN),
             nn.ReLU(),
-            dqn_model.NoisyLinear(1024, n_actions * N_ATOMS)
+            dqn_model.NoisyLinear(NEURONS_IN, n_actions * N_ATOMS)
         )
 
         self.register_buffer("supports", torch.arange(Vmin, Vmax+DELTA_Z, DELTA_Z))
@@ -51,7 +58,7 @@ class RainbowDQN(nn.Module):
 
     def forward(self, x):
         batch_size = x.size()[0]
-        fx = x.float() / 1024
+        fx = x.float() / NEURONS_IN
         val_out = self.fc_val(fx).view(batch_size, 1, N_ATOMS)
         adv_out = self.fc_adv(fx).view(batch_size, -1, N_ATOMS)
         adv_mean = adv_out.mean(dim=1, keepdim=True)
@@ -120,7 +127,6 @@ if __name__ == "__main__":
     env = SnakeEnvironment(draw=False, fps=1, debug=False)
 
     writer = SummaryWriter(comment="-" + params['run_name'] + "-rainbow")
-    writer = None
 
     net = RainbowDQN(env.observation_space.n, env.action_space.n).to(device)
     tgt_net = ptan.agent.TargetNet(net)

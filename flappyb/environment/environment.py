@@ -130,6 +130,12 @@ class Environment(gym.Env):
 
     def step(self, action):
 
+        if isinstance(action, np.ndarray):
+            if action[0] > action[1]:
+                action = 0
+            else:
+                action = 1
+
         obs = []
         rew = 0
 
