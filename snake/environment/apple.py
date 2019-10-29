@@ -3,9 +3,6 @@
 import pygame
 import random
 
-# ToDo:
-# check if there is already a snake
-
 
 class Apple:
 
@@ -51,7 +48,7 @@ class Apple:
             rand_y = random.randint(0, rows)
 
             for i in tail:
-                if rand_x == i.x and rand_y == i.y:
+                if rand_x == int(i.x / self.scale) and rand_y == int(i.y / self.scale):
                     bad_position = True
                     break
 

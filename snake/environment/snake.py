@@ -35,6 +35,7 @@ class Snake:
             self.move(-1, 0)
 
     def handle_events_ai(self, action):
+        # print(action)
         if action == 0:
             self.move(0, -1)
         if action == 1:
@@ -86,13 +87,13 @@ class Snake:
         self.y_speed = y
 
     def check_if_hit_wall(self):
-        if self.x == 0:
+        if self.x == -1:
             return True
-        if self.x == self.s_width - self.scale:
+        if self.x == self.s_width:
             return True
-        if self.y == 0:
+        if self.y == -1:
             return True
-        if self.y == self.s_height - self.scale:
+        if self.y == self.s_height:
             return True
 
     def check_if_ate_self(self):

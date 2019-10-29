@@ -15,13 +15,15 @@ import torch
 import torch.optim as optim
 import torch.nn.functional as F
 
+ENV = SnakeEnvironment(draw=True, fps=100, debug=False, animation=False)
+TEST_ENV = SnakeEnvironment( draw=False, fps=100, debug=False, animation=False)
 
 GAMMA = 0.99
 GAE_LAMBDA = 0.95
 
 TRAJECTORY_SIZE = 2049
-LEARNING_RATE_ACTOR = 1e-4
-LEARNING_RATE_CRITIC = 1e-3
+LEARNING_RATE_ACTOR = 1e-3
+LEARNING_RATE_CRITIC = 1e-2
 
 PPO_EPS = 0.2
 PPO_EPOCHES = 10
@@ -91,7 +93,7 @@ if __name__ == "__main__":
     # parser.add_argument("-e", "--env", default=ENV_ID, help="Environment id, default=" + ENV_ID)
     # args = parser.parse_args()
 
-    name = "test-flappyb"
+    name = "test-snake"
 
     # device = torch.device("cuda" if args.cuda else "cpu")
     device = torch.device("cpu")
@@ -99,8 +101,8 @@ if __name__ == "__main__":
     save_path = os.path.join("saves", "ppo-" + name)
     os.makedirs(save_path, exist_ok=True)
 
-    env = SnakeEnvironment(draw=False, fps=150, debug=False)
-    test_env = SnakeEnvironment(draw=False, fps=150, debug=False)
+    env = ENV
+    test_env = TEST_ENV
 
     net_act = model.ModelActor(env.observation_space.n, env.action_space.n).to(device)
     net_crt = model.ModelCritic(env.observation_space.n).to(device)

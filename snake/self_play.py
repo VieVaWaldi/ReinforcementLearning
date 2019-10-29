@@ -1,14 +1,14 @@
 from environment.environment import SnakeEnvironment
 import random
 
-env = SnakeEnvironment(draw=True, fps=100, debug=True)
+env = SnakeEnvironment(draw=True, speed=100, rows=5, animation=False)
 
-# env.run_human_game()
+# env.play_human()
 
-env.reset()
-is_done = False
-while not is_done:
-    action = random.randint(0, 4)
-    next_state, reward, terminal, _ = env.step(action)
-    print(reward)
-    is_done = terminal
+while True:
+	env.reset()
+	terminal = False
+	while not terminal:
+	    action = random.randint(0, 4)
+	    next_state, reward, is_done, _ = env.step(action)
+	    terminal = is_done
