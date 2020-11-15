@@ -1,4 +1,4 @@
-# Reinforcement Learning
+# Reinforcement $
 
 The algorithms were implemented using the book: "Deep Reinforcement Learning Hands-On" written by Maxim Lapan.
 He provides a github repo with multiple implementations, that can be found in here:
@@ -33,4 +33,7 @@ But the models name indicates the settings for the parameters.
 * The environment is constantly being updated, thus saved models often are not usable anymore
 * old_agents probably dont work because the folder structured changed often
 
+$\theta$
+$\theta
+\theta
 
